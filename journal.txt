@@ -1,0 +1,19 @@
+Membres :
+  Léo Nivet
+  Abdelhak Benmazouza
+  Edouard Sablery
+  
+  
+ 08/02/2019 :
+    Objetifs : -Prototype du parser
+               -Decouverte de SDL2
+               -Reflexion sur l'organisation du projet
+               
+ 15/02/2019 :
+   Terminés : -Prototype du parser
+              -Test de SDL2
+              -Organisation du projet
+   Objectifs : -Lier le parser avec les fonctionnalités
+              -Affichage d'une image avec SDL2
+              -Sauvegarder et charger une image
+              
