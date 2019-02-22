@@ -17,3 +17,10 @@ Membres :
               -Affichage d'une image avec SDL2
               -Sauvegarder et charger une image
               
+  22/02/2019:
+   Terminés : -Parser sous forme de modules
+              -Décisions prises sur la structure du programme en termes de modules, un module parser, un Images qui contient tout les fonction de traimtement image, un module window pour la gestion des fenetres evenements etc, un main qui utulisera les autres modules.
+   Objectifs : -Module images avec affichage d'une image et autres
+   	       -Module window avec fonctionnalités basiques.
+	       -Shéma de l'architecture du programme et shéma de la structure des données.
+	       
