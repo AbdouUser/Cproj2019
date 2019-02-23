@@ -1,7 +1,7 @@
 #include <SDL2/SDL.h>
  #include <sys/types.h>
-     #include <sys/uio.h>
-     #include <unistd.h>
+#include <sys/uio.h>
+#include <unistd.h>
 
 #include "window.h"
 #include "image.h"
@@ -32,7 +32,7 @@ int init_SDL(){
 	return 0;
 }
 
-//initie une fenetre de nom name, et de taille width x height, return NULL en cas d'échec
+//initie une liste chainée de fenêtre avec une premiere fenetre de nom name, et de taille width x height, return NULL en cas d'échec
 struct window* init_window(char* name, int width, int height){
 	if(name == NULL || width <=0 || height <= 0){
 		return NULL;
@@ -58,7 +58,7 @@ struct window* init_window(char* name, int width, int height){
 	return w;
 }
 
-//ajoute une fenêtre à un liste de fenêtre
+//ajoute une fenêtre à un liste chainée de fenêtre, retourne 0 si succès, -1 sinon
 int add_window(struct window* w, char* name, int width, int height){
 	if(w == NULL || name == NULL || width <= 0 || height <= 0){
 		return -1;
@@ -84,12 +84,12 @@ void close_window(struct window* w){
 	SDL_DestroyWindow(w->pWindow);
 }
 
-//fermer la SDL
+//ferme la SDL
 void end_SDL(){
 	SDL_Quit();
 }
 
-// attend un evenement des fenetres et agit indéfiniment jusqu'à l'evement 'fermer la fenetre' alors retourne -1 (pour traiter la liste chainée struct window) ou l'evenement [c] (touche c appuyée) -> demande de l'utilisateur pour rentrer une commande et retourne 0
+// attend un evenement des fenetres et agit indéfiniment jusqu'à ce que toute les fenêtres soient fermées alors retourne -1 (pour quitter le programme) ou l'evenement [c] (touche c appuyée) -> demande de l'utilisateur pour rentrer une commande et retourne 0
 int wait_event_react_until_quit_or_ask(struct window* w){
 	SDL_Event event;
 	while(1){
