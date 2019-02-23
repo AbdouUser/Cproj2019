@@ -39,6 +39,7 @@ struct window* init_window(char* name, int width, int height){
 	}
 	struct window* w = malloc(sizeof(struct window));
 	w->name = name;
+	w->next = NULL;
 	w->pWindow = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	if(w->pWindow == NULL){
 		return NULL;
@@ -57,6 +58,26 @@ struct window* init_window(char* name, int width, int height){
 	return w;
 }
 
+//ajoute une fenêtre à un liste de fenêtre
+int add_window(struct window* w, char* name, int width, int height){
+	if(w == NULL || name == NULL || width <= 0 || height <= 0){
+		return -1;
+	}
+	struct window* new_w = init_window(name, width, height);
+	if(new_w == NULL){
+		return -1; // erreur de création de la fenêtre
+	}
+	if(w->pWindow == NULL){ // on ajoute une fenetre à une liste qui n'en a plus
+		(*w) = (*new_w);
+		return 0;
+	}
+	while(w->next != NULL){ // sinon on va à la fin de la liste chainée
+		w = w->next;
+	}
+	w->next = new_w; // et on l'ajoute
+	return 0;
+}
+
 //Ferme une fenetre
 void close_window(struct window* w){
 	SDL_DestroyRenderer(w->renderer);
@@ -69,15 +90,33 @@ void end_SDL(){
 }
 
 // attend un evenement des fenetres et agit indéfiniment jusqu'à l'evement 'fermer la fenetre' alors retourne -1 (pour traiter la liste chainée struct window) ou l'evenement [c] (touche c appuyée) -> demande de l'utilisateur pour rentrer une commande et retourne 0
-int wait_event_react_until_quit_or_ask(){
+int wait_event_react_until_quit_or_ask(struct window* w){
 	SDL_Event event;
 	while(1){
+		printf("%s\n", w->name);
 		SDL_WaitEvent(&event);
 		if(event.type == SDL_WINDOWEVENT){
 			if(event.window.event == SDL_WINDOWEVENT_CLOSE){
-				SDL_DestroyRenderer(SDL_GetRenderer(SDL_GetWindowFromID(event.window.windowID)));
-				SDL_DestroyWindow((SDL_GetWindowFromID(event.window.windowID)));
-				return -1;
+				if(SDL_GetWindowFromID(event.window.windowID) == w->pWindow){
+					if(w->next == NULL){ // une seule fenetre
+						close_window(w);
+						// on ne free(w) pas car on garde la première struct window comme tete de liste
+						return -1; // plus de fenetre
+					}
+					close_window(w);
+					(*w) = (*w->next);
+				}
+				else{
+					struct window* tmp_w = w;
+					struct window* tmp_w_n = w->next; // non null il y a au moins deux fenetres
+					while(SDL_GetWindowFromID(event.window.windowID) != tmp_w_n->pWindow){
+						tmp_w = tmp_w_n;
+						tmp_w_n = tmp_w_n->next;
+					}
+					tmp_w->next = tmp_w_n->next; // on supprime la window on concervant la liste chainée
+					close_window(tmp_w_n);
+					free(tmp_w_n);
+				}
 			}
 		}
 		else if(event.type == SDL_KEYDOWN){
@@ -115,12 +154,16 @@ int main(void){
 		return -1;
 	}
 
-	struct window* v = init_window("Fenêtre 2", 600, 600);
-	if(v == NULL){
+	if(add_window(w,"Fenetre 2", 600, 600) == -1){
 		return -1;
 	}
 	
-	    wait_event_react_until_quit_or_ask();
+
+	if(add_window(w,"Salut", 100, 200) == -1){
+		return -1;
+	}
+	
+	    wait_event_react_until_quit_or_ask(w);
 
 	close_window(w);
 	end_SDL();
