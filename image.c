@@ -29,16 +29,27 @@ void init_images(){
 
 //fonction qui stock une image dans le tableau et l associe une cle 
 int get_new_key(image *img){
-
+        if(nb<MAX_IMG){
+		int i;		
+		for(i=0;i<MAX_IMG;i++){
+			if(assoc_img_tab[i].exist != 0){
+				assoc_img_tab[i]img=img;				
+				return i;
+			}
+		}	
+	}
+	else 
+		return -1;
 }
 
 //fonction qui cree une strucrure image pour une nouvelle image et renvoie la cle associe 
-int create_img(char *path,/***d autre parametre a propose***/){
+int create_img(char *path){
         SDL_Surface *img=NULL;
         img=SDL_loadBMP(path);
-        //gestion d une eventuelle erreur....
-	
-return get_new_key(img);
+	if(img!=NULL)
+		return get_new_key(img);
+	else 
+		return NULL;
 }
 
 
@@ -49,15 +60,18 @@ image *get_img_by_key(int key){
 	return assoc_img_tab[key].img;
 
   else 
-	//reourner -1 ou/et message d erreur.
+	return -1;
 }
 
 // enregister l image de la cle key 
-int save(int key){/***********/}
+int save(int key){
+	
+
+}
 
 //rotation de l image de cle key 
-int rotation (int key,/*** d autre parametres ....*/){
-
+int rotation (int key,short rotation){
+	
 }
 
 //les autre fonction de traitement de l image independement des fenetres.......
