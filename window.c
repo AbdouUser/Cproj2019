@@ -7,7 +7,7 @@
 #include "image.h"
 
 struct image_window{
-	struct image* img;
+	int key_image;
 	int posx;
 	int posy;
 	struct image_window* next;
@@ -117,6 +117,9 @@ int wait_event_react_until_quit_or_ask(struct window* w){
 					close_window(tmp_w_n);
 					free(tmp_w_n);
 				}
+			}
+			else if(event.window.event == SDL_WINDOWEVENT_RESIZED){
+				SDL_RenderPresent(w->renderer);
 			}
 		}
 		else if(event.type == SDL_KEYDOWN){
