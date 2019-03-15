@@ -1,46 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "parser.h"
 
-
-#define CHAR_LIMIT 500 //longueur max en char des commandes de l'utilisateur dans le shell
-#define NB_PARAM_MAX 5 //Ne pas modifier sans modifier la partie du main avec le switch statement
-#define NB_OF_FUNCTIONS 3 //Nombre de commandes totales !!ATTENTION A BIEN VERIFIER!!
-
-// Fonctions du shell
-// Doivent pouvoir recevoir tous ses paramètres sous forme de string aka (char*)
-
-//For testing purpose :
-int test1(char* entier) {
-  printf("\nExecution of test1 with %s",entier);
-  return 0;
-}
-
-
-
-
-int test2(char* var, char* entier) {
-  printf("\nExecution of test2 with %s and %s",var,entier);
-  return 0;
-}
 
 
 
 //  -- PARSER -- //
 
-//une fonction est une struct qui contient les informations necessaire au fonctionnement du parser
-typedef struct fonction {
-  //la chaine de caractère correpondant au nom de la commande écrite dans le terminal
-  char* funcName;
-  //tableau de fonctions traitant chaque paramètre : par exemple pour une fonction ayant deux entiers en paramètre -> {checkInt, checkInt}
-  int nb_param;
-  char* (*listeParam[NB_PARAM_MAX])(char*,int*);
-  //pointeur vers sa fonction
-  int (*pointeurFunction)();
-}fonction;
-//ces fonctions sont dans un tableau
-
-//PARTIE ANALYSE
+//PARTIE ANALYSE D'ARGUMENTS
 short isAlphanumeric(char c){
   return ((c>= '0' && c<= '9') ||( c>='a' && c <+'z') ||( c>='A' && c <+'Z'));
 }
@@ -106,6 +74,7 @@ char* checkVar(char* s, int* pos){
   return res;
 }
 
+
 fonction* searchFunction (char* s, int* pos, fonction* funcTab) {
   char funcRead[CHAR_LIMIT];
   int posFuncRead = 0;
@@ -157,26 +126,13 @@ void userCommande (char* s){
 }
 
 //MAIN
-int main(void) {
-  //test1 function
-  int(*pointeurTest1)(char*);
-  pointeurTest1 = test1;
-  fonction f1 = {"test1",1,{checkInt},pointeurTest1};
-  //test2 function
-  int(*pointeurTest2)(char*,char*);
-  pointeurTest2 = test2;
-  fonction f2 = {"test2" ,2,{checkVar, checkInt},pointeurTest2};
-  //exit function
-  fonction exit = {"exit",0, {},NULL};
-
-  //table with all the function !! ATTENTION refresh the size on the top of the code : #define NB_OF_FUNCTIONS  !!
-  fonction tableauDesFonctions[NB_OF_FUNCTIONS] = {f1, f2, exit};
+int execParser(void) {
   int lastFuncCalledValue = 0;
-
+  fonction tableauDesFonctions[NB_OF_FUNCTIONS];
+  initCommands(&tableauDesFonctions);
   //Execution du parser
   do {
-    //affichage du chemin
-    printf("\n<user>:<adresse>$ ");
+    printf("\n::>");
     //attente d'une entrée utilisateur
     char input[CHAR_LIMIT];
     int pos = 0;
@@ -185,7 +141,7 @@ int main(void) {
     //traitement de l'entrée
     normalise(input);
     //analyse de l'entrée
-    fonction* f = searchFunction (input, &pos, tableauDesFonctions);
+    fonction* f = searchFunction(input, &pos, tableauDesFonctions);
     short noErrorOccurred=1;
     //COMMANDE INCONNUE
     if (f == NULL) {
