@@ -2,13 +2,13 @@
 #define WINDOW_H
 
 struct image;
-
 typedef struct image image;
 
 #define MAX_IMG 1000 
 
 void init_images();
 int get_new_key(image *img);
+
 int create_img(char *path); /***d autre parametre a propose***/
 image *get_img_by_key(int key);
 int save(int key);

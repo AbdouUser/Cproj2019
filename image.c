@@ -6,7 +6,6 @@
 
 #include "image.h"
 
-
 typedef struct image{
         char *name;
 	SDL_Surface *img;
@@ -17,7 +16,6 @@ typedef struct assoc_img{
 	int key;
 	short exist;
 	image *img;
-	
 } assoc_img;
 
 static assoc_img assoc_img_tab[MAX_IMG];
@@ -57,7 +55,7 @@ image *get_img_by_key(int key){
   if(key<MAX_IMG && assoc_img_tab[key].exist)
 	return assoc_img_tab[key].img;
 
-  else 
+  else
 	return NULL;
 }
 
@@ -73,3 +71,16 @@ int save(int key){
 
 
 //les autre fonction de traitement de l image independement des fenetres.......
+	//reourner -1 ou/et message d erreur.
+}
+
+// enregister l image de la cle key 
+int save(int key){return 1;}
+
+//rotation de l image de cle key 
+int rotation (int key){
+  return 1;
+}
+
+//les autre fonction de traitement de l image independement des fenetres.......
+
