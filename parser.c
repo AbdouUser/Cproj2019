@@ -125,11 +125,13 @@ void userCommande (char* s){
   fgets(s,CHAR_LIMIT, stdin);
 }
 
-//MAIN
-int execParser(void) {
+//fonction qui execute le parser dans le terminal
+int execParser(fonction* tableauDesFonctions) {
   int lastFuncCalledValue = 0;
+  /*
   fonction tableauDesFonctions[NB_OF_FUNCTIONS];
   initCommands(&tableauDesFonctions);
+  */
   //Execution du parser
   do {
     printf("\n::>");

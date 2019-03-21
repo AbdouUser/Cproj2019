@@ -25,7 +25,7 @@ char* checkVar(char* s, int* pos);
 fonction* searchFunction (char* s, int* pos, fonction* funcTab);
 void normalise (char* s);
 void userCommande (char* s);
-int execParser(void);
+int execParser(fonction* tf);
 
 
 #endif
