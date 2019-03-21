@@ -1,10 +1,13 @@
-all: CIMP
+CC=GCC
 
-CIMP: main.c parser.c parser.h userCommands.c userCommands.h
-	gcc -o CIMP *.c -Wall -std=c11
+CFLAGGS=-Wall -g -std=c11
+LDLIBS= -lm -I include/ -L lib/ -l SDL2-2.0.0 -lSDL2_image
+ALL =
+all : $(ALL)
 
-clean:
-	rm -rf *.o
+window : window.o image.o
+image.o : image.c image.h
+window.o : window.c window.h image.h
 
-mrproper: clean
-	rm -rf CIMP
+cleanall:
+	rm -rf *~(ALL)
