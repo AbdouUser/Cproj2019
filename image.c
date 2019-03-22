@@ -6,35 +6,32 @@
 
 #include "image.h"
 
-typedef struct image{
-        char *name;
-	SDL_Surface *img;
-	int type;
-} image;
-
-typedef struct assoc_img{
-	int key;
-	short exist;
-	image *img;
-} assoc_img;
-
-static assoc_img assoc_img_tab[MAX_IMG];
-static int nb;
+static assoc_img* assoc_img_tab[100];
+static int nb = 0;
 
 
 
 // lancement du module image au moment du lancement du programme avec initialisation de la table des images 
 void init_images(){
-	int i;	
+	/*int i;	
 	for(i=0;i<MAX_IMG;i++)
 		assoc_img_tab[i].exist=0;
-	nb=0;
+	nb=0;*/
+	return;
 		
 } 
 
 //fonction qui stock une image dans le tableau et l associe une cle 
 int get_new_key(image *img){
-	return 1;
+	assoc_img* a_img = malloc(sizeof(assoc_img));
+	if(a_img == NULL){
+		return -1;
+	}
+	a_img->key = nb;
+	a_img->img = img;
+	assoc_img_tab[nb] = a_img;
+	nb++;
+	return a_img->key;
 }
 
 //fonction qui cree une strucrure image pour une nouvelle image et renvoie la cle associe 
@@ -43,20 +40,20 @@ int create_img(char *path){ /***d autre parametre a propose***/
         img=IMG_Load(path);
         image* i = malloc(sizeof(image)); 
         i->img = img;
+        i->name = path;
         //gestion d une eventuelle erreur....
-	
 		return get_new_key(i);
 }
 
 
 //recuperer la structure image de la cle key 
 image *get_img_by_key(int key){
- 
-  if(key<MAX_IMG && assoc_img_tab[key].exist)
-	return assoc_img_tab[key].img;
-
-  else
-	return NULL;
+	if(key<MAX_IMG && key >= 0){
+		return assoc_img_tab[key]->img;
+	}
+	else{
+		return NULL;
+	}
 }
 
 // enregister l image de la cle key 

@@ -2,6 +2,8 @@
 #include <sys/types.h>
 #include <sys/uio.h>
 #include <unistd.h>
+#include <string.h>
+#include <SDL2/SDL_image.h>
 
 #include "window.h"
 #include "image.h"
@@ -40,6 +42,7 @@ struct window* init_window(char* name, int width, int height){
 	struct window* w = malloc(sizeof(struct window));
 	w->name = name;
 	w->next = NULL;
+	w->img_w = NULL;
 	w->pWindow = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
 	if(w->pWindow == NULL){
 		return NULL;
@@ -76,6 +79,33 @@ int add_window(struct window* w, char* name, int width, int height){
 	}
 	w->next = new_w; // et on l'ajoute
 	return 0;
+}
+
+int add_image(struct window* w, int key){
+	if(w == NULL){ // il n'y a pas encore d'image
+		return -1; // erreur
+	}
+	if(w->img_w == NULL){ // pas encore d'image
+		w->img_w = malloc(sizeof(struct image_window));
+		if(w->img_w == NULL){
+			return -1; //erreur d'allocation
+		}
+		w->img_w->key_image = key;
+		w->img_w->posx = 0; // en haut à gauche par défaut
+		w->img_w->posy = 0;
+		w->img_w->next = NULL;
+		return 1; //succès
+	}
+	struct image_window* img_w = w->img_w;
+	while(img_w->next != NULL){
+		img_w = img_w->next;
+	}
+	img_w->next = malloc(sizeof(struct image_window));
+	img_w->next->key_image = key;
+	img_w->next->posx = 0;
+	img_w->next->posy = 0;
+	img_w->next->next = NULL;
+	return 1; // succès
 }
 
 //Ferme une fenetre
@@ -119,7 +149,15 @@ int wait_event_react_until_quit_or_ask(struct window* w){
 				}
 			}
 			else if(event.window.event == SDL_WINDOWEVENT_RESIZED){
-				SDL_RenderPresent(w->renderer);
+				struct window* tmp_w = w;
+				while(SDL_GetWindowFromID(event.window.windowID) != tmp_w->pWindow){
+					tmp_w = w->next;
+				}
+				if(tmp_w != NULL){
+					SDL_RenderClear(tmp_w->renderer); 
+					SDL_RenderPresent(tmp_w->renderer);
+					SDL_UpdateWindowSurface(tmp_w->pWindow);
+				}
 			}
 		}
 		else if(event.type == SDL_KEYDOWN){
@@ -147,6 +185,40 @@ int wait_event_react_until_quit_or_ask(struct window* w){
 	}
 }
 
+int load_a_image(struct window* w, char* name, char* image){
+	if(w == NULL || name == NULL || image == NULL){
+		return -1;
+	}
+	struct window* window = w;
+	while(strcmp(window->name, name) != 0 && window != NULL){
+		window = window->next;
+	}
+	if(window == NULL){ // pas de fenetre qui porte ce nom
+		return -2; // erreur -2;
+	}
+	int i = create_img(image);
+	if(i == -1){ // erreur dans la creation de l'image
+		return -3; // erreur -3
+	}
+	if(add_image(window, i) != 1){
+		return -4; //erreur d'ajout d'image
+	}
+	SDL_Texture* texture = malloc(sizeof(SDL_Texture*));
+	texture = SDL_CreateTextureFromSurface(window->renderer, get_img_by_key(i)->img);
+	//SDL_Texture* t = IMG_LoadTexture(window->renderer, "test1.jpg");
+	SDL_Rect position_texture;
+	position_texture.x = 20;
+	position_texture.y = 20;
+	position_texture.w = 400;
+	position_texture.h = 400;
+	//SDL_QueryTexture(texture, NULL, NULL, &position_texture.w, &position_texture.h);
+	SDL_RenderClear(window->renderer);
+	SDL_RenderCopy(window->renderer, texture, NULL, &position_texture);
+	SDL_RenderPresent(window->renderer);
+	SDL_UpdateWindowSurface(window->pWindow);
+	return 1; //succes
+}
+
 //un main de test
 int main(void){
 	if(init_SDL() != 0){
@@ -165,6 +237,10 @@ int main(void){
 	if(add_window(w,"Salut", 100, 200) == -1){
 		return -1;
 	}
+
+	init_images();
+
+	printf("*************** %d\n", load_a_image(w, "Fenêtre 1", "test1.jpg"));
 	
 	    wait_event_react_until_quit_or_ask(w);
 
