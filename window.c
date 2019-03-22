@@ -148,7 +148,7 @@ int wait_event_react_until_quit_or_ask(struct window* w){
 }
 
 //un main de test
-/*int main(void){
+int main(void){
 	if(init_SDL() != 0){
 		return -1;
 	}
@@ -171,4 +171,4 @@ int wait_event_react_until_quit_or_ask(struct window* w){
 	close_window(w);
 	end_SDL();
 	return 0;
-}*/
+}

@@ -64,18 +64,9 @@ int save(int key){
 	return 1;
 }
 
-//rotation de l image de cle key 
-	int rotation (){ /*** d autre parametres ....*/
-		return 1;
-	}
-
 
 //les autre fonction de traitement de l image independement des fenetres.......
 	//reourner -1 ou/et message d erreur.
-}
-
-// enregister l image de la cle key 
-int save(int key){return 1;}
 
 //rotation de l image de cle key 
 int rotation (int key){

@@ -2,7 +2,7 @@ CC=GCC
 
 CFLAGGS=-Wall -g -std=c11
 LDLIBS= -lm -I include/ -L lib/ -l SDL2-2.0.0 -lSDL2_image
-ALL =
+ALL = window
 all : $(ALL)
 
 window : window.o image.o
