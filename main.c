@@ -1,16 +1,20 @@
-#include "userCommands.h"
-#include "parser.h"
 #include "window.h"
+#include "parser.h"
+#include "userCommands.h"
+#include "main.h"
+
 
 int main(void){
-  if (init_SDL() == -1) return -1;
-  struct window* w = init_window("CIMP",800,500);
-  if (w == NULL) return -1;
-  wait_event_react_until_quit_or_ask(w);
-  close_window(w);
-  end_SDL();
-  fonction tableauDesFonctions[NB_OF_FUNCTIONS];
-  initCommands(tableauDesFonctions);
-  execParser(tableauDesFonctions);
+	init_SDL();
+	struct window* w = init_window("Fenêtre 1", 600, 600);
+	if(w == NULL){
+		exit(0);
+	}
+	fonction tableauDesFonctions[NB_OF_FUNCTIONS];
+	initCommands(tableauDesFonctions, w);
+	while(1){
+  		execParser(tableauDesFonctions);  
+  		wait_event_react_until_quit_or_ask(w);
+  	}
   return 0;
 }

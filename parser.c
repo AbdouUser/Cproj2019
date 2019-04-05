@@ -49,11 +49,11 @@ char* checkInt(char* s, int* pos){
 char* checkVar(char* s, int* pos){
   char* res = malloc (sizeof (char) * CHAR_LIMIT);
   int posRes = 0;
-  if(s[*pos]!='$'){
+ /* if(s[*pos]!='$'){
     return NULL;
-  }
-  res[posRes]=s[*pos];
-  *pos += 1;
+  }*/
+  //res[posRes]=s[*pos];
+  //*pos += 1;
   posRes += 1;
   if (!isAlphabetic(s[*pos])){
     return NULL;
@@ -103,15 +103,15 @@ void normalise (char* s) {
   if (s != NULL) {
     for (int i = 0; s[i] != '\0'; i++){
       if (s[i] == ' ') {
-	int dec = 0;
-	int j = i+1;
-	while (s[j] == ' ') {
-	  j++;
-	  dec++;
-	}
-	for(j=i+1; s[j] != '\0'; j++){
-	  s[j]=s[j+dec];
-	}
+        int dec = 0;
+        int j = i+1;
+        while (s[j] == ' ') {
+          j++;
+          dec++;
+        }
+        for(j=i+1; s[j] != '\0'; j++){
+          s[j]=s[j+dec];
+        }
       }
     }
   }
@@ -150,98 +150,101 @@ int execParser(fonction* tableauDesFonctions) {
       continue;
     }
     //COMMANDE EXIT
-    else if (strcmp(f->funcName,"exit") == 0) {
+    else if (strcmp(f->funcName,"window") == 0) {
       if(input[pos] == ' '){
-	pos += 1;
-	if(input[pos] != '\0' && input[pos] != EOF && input[pos] != '\n' ){
-	  char* entier = checkInt(input, &pos);
-	  if (entier == NULL){
-	    printf("\nParamètre non reconnu.");
-	    continue;
-	  }
-	  char* ptrEnd;
-	  long res = strtol(entier, &ptrEnd, 10);
-	  free(entier);
-	  return res;
-	}
-	else {
-	  return lastFuncCalledValue;
-	}
+        pos += 1;
+        if(input[pos] != '\0' && input[pos] != EOF && input[pos] != '\n' ){
+          char* entier = checkInt(input, &pos);
+          if (entier == NULL){
+            printf("\nParamètre non reconnu.");
+            continue;
+          }
+          char* ptrEnd;
+          long res = strtol(entier, &ptrEnd, 10);
+          free(entier);
+          return res;
+        }
+        else {
+          return lastFuncCalledValue;
+        }
       }
       else if (input[pos] == '\0' || input[pos] == EOF || input[pos] == '\n' ){
-	return lastFuncCalledValue;
+        return lastFuncCalledValue;
       }
       else {
-	printf("\nCaractère \'%c\'non attendu position %d.\n",input[pos],pos);
-	continue;
+        printf("\nCaractère \'%c\'non attendu position %d.\n",input[pos],pos);
+        continue;
       }
+    }
+    else if(strcmp(f->funcName,"exit") == 0){
+      exit(0);
     }
     //COMMANDE RECONNUE
     else {
       char* paramTab[f->nb_param];
       //anaylse des paramètres attendus
       for (int i = 0; i < f->nb_param; i++) {
-	pos+=1;//l'espace avant chaque paramètre
-	char* testParam = f->listeParam[i](input, &pos);
-	if (testParam == NULL) {
-	  printf("\nLe paramètre %d est inccorect\n",i+1);
-	  noErrorOccurred = 0;
-	  break;
-	}
-	else {
-	  paramTab[i] = testParam;//add the string to the paramtab
-	}
-      }
-      if (noErrorOccurred == 1) {
+  pos+=1;//l'espace avant chaque paramètre
+  char* testParam = f->listeParam[i](input, &pos);
+  if (testParam == NULL) {
+    printf("\nLe paramètre %d est inccorect\n",i+1);
+    noErrorOccurred = 0;
+    break;
+  }
+  else {
+    paramTab[i] = testParam;//add the string to the paramtab
+  }
+}
+if (noErrorOccurred == 1) {
       //Check if end of string reached
-	if (input[pos] == ' ') {pos++;}//espace eventuel
-	if (input[pos] != '\0' && input[pos] != '\n' && input[pos] != EOF) {
-	  noErrorOccurred = 0;
-	  printf("\nCaractère \'%c\'non attendu position %d.\n",input[pos],pos);
-	}//End of string
-      }
-      if (noErrorOccurred == 1){
-	//si correcte executer la commande respective :
-	switch(f->nb_param){
-	case 0 :
-	  lastFuncCalledValue = (f->pointeurFunction)();
-	  break;
-	case 1 :
-	  lastFuncCalledValue = f->pointeurFunction(paramTab[0]);
-	  free(paramTab[0]);
-	  break;
-	case 2 :
-	  lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1]);
-	  free(paramTab[0]);
-	  free(paramTab[1]);
-	  break;
-	case 3 :
-	  lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2]);
-	  free(paramTab[0]);
-	  free(paramTab[1]);
-	  free(paramTab[2]);
-	  break;
-	case 4 :
-	  lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3]);
-	  free(paramTab[0]);
-	  free(paramTab[1]);
-	  free(paramTab[2]);
-	  free(paramTab[3]);
-	  break;
-	case 5 :
-	  (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3],paramTab[4]);
-	  free(paramTab[0]);
-	  free(paramTab[1]);
-	  free(paramTab[2]);
-	  free(paramTab[3]);
-	  free(paramTab[4]);
-	  break;
-	default:
-	  printf("\nNombre de paramètres incorrect\n");
-	  break;
-	}
-      }
-    }
+  if (input[pos] == ' ') {pos++;}//espace eventuel
+  if (input[pos] != '\0' && input[pos] != '\n' && input[pos] != EOF) {
+    noErrorOccurred = 0;
+    printf("\nCaractère \'%c\'non attendu position %d.\n",input[pos],pos);
+  }//End of string
+}
+if (noErrorOccurred == 1){
+  //si correcte executer la commande respective :
+  switch(f->nb_param){
+    case 0 :
+    lastFuncCalledValue = (f->pointeurFunction)();
+    break;
+    case 1 :
+    lastFuncCalledValue = f->pointeurFunction(paramTab[0]);
+    free(paramTab[0]);
+    break;
+    case 2 :
+    lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1]);
+    free(paramTab[0]);
+    free(paramTab[1]);
+    break;
+    case 3 :
+    lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2]);
+    free(paramTab[0]);
+    free(paramTab[1]);
+    free(paramTab[2]);
+    break;
+    case 4 :
+    lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3]);
+    free(paramTab[0]);
+    free(paramTab[1]);
+    free(paramTab[2]);
+    free(paramTab[3]);
+    break;
+    case 5 :
+    (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3],paramTab[4]);
+    free(paramTab[0]);
+    free(paramTab[1]);
+    free(paramTab[2]);
+    free(paramTab[3]);
+    free(paramTab[4]);
+    break;
+    default:
+    printf("\nNombre de paramètres incorrect\n");
+    break;
+  }
+}
+}
   }while(1); //boucle infini
 }
 

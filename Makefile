@@ -3,14 +3,16 @@ CC=gcc
 
 CFLAGS=-Wall -g -std=c11 
 LDLIBS= -lm -I include/ -L lib/ -l SDL2-2.0.0 -lSDL2_image
-all: CIMP
 
+ALL = main
+all : $(ALL)
 
-CIMP: main.c parser.c parser.h userCommands.c userCommands.h image.c image.h window.c window.h include/SDL2/SDL.h
-	$(CC) *.o -o CIMP -lSDL $(CFLAGS) 
+main : main.o window.o image.o userCommands.o parser.o
+main.o : main.c window.h userCommands.h parser.h main.h
+userCommands.o : userCommands.c userCommands.h main.h window.h
+parser.o : parser.c parser.h
+image.o : image.c image.h
+window.o : window.c window.h image.h
 
 clean:
 	rm -rf *.o
-
-mrproper: clean
-	rm -rf CIMP
