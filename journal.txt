@@ -22,5 +22,13 @@ Membres :
               -Décisions prises sur la structure du programme en termes de modules, un module parser, un Images qui contient tout les fonction de traimtement image, un module window pour la gestion des fenetres evenements etc, un main qui utulisera les autres modules.
    Objectifs : -Module images avec affichage d'une image et autres
    	       -Module window avec fonctionnalités basiques.
-	       -Shéma de l'architecture du programme et shéma de la structure des données.
+	       -Schéma de l'architecture du programme et schéma de la structure des données.
+
+  15/03/2019:
+    Terminés : -Schémas
+    	       -Prototype du module image
+	       -Prototype du module fenêtre
+    Objectifs : -Relier les modules entre eux
+    	      	-Fonctionnalités : modification image, sauvegarde...
+				   
 	       
