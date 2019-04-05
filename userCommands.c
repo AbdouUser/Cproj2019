@@ -21,7 +21,10 @@ int test2(char* var, char* entier) {
   printf("\nExecution of test2 with %s and %s",var,entier);
   return 0;
 }
-
+/*
+  Commande pour créer une fenêtre
+  Syntaxe : NEWWINDOW <name> <width> <height>
+*/
 int NEWWINDOW(char* var, char* entier1, char* entier2){
   add_window(w, var, atoi(entier1), atoi(entier2));
   return 0;

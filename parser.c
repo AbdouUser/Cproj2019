@@ -149,7 +149,8 @@ int execParser(fonction* tableauDesFonctions) {
     if (f == NULL) {
       continue;
     }
-    //COMMANDE EXIT
+    /*COMMANDE window qui permet à l'utilisateur d'être en mode fenêtre 
+    et pas en mode invite de commande*/
     else if (strcmp(f->funcName,"window") == 0) {
       if(input[pos] == ' '){
         pos += 1;
@@ -176,7 +177,7 @@ int execParser(fonction* tableauDesFonctions) {
         continue;
       }
     }
-    else if(strcmp(f->funcName,"exit") == 0){
+    else if(strcmp(f->funcName,"exit") == 0){ // commande pour quitter le programme
       exit(0);
     }
     //COMMANDE RECONNUE

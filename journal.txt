@@ -30,5 +30,11 @@ Membres :
 	       -Prototype du module fenêtre
     Objectifs : -Relier les modules entre eux
     	      	-Fonctionnalités : modification image, sauvegarde...
+
+  5/04/2019:
+    Aujourd'hui nous avons créé la première commande fonctionnelle dans l'interpreteur de commande : NEWWINDOW <name> <width> <height> qui crée une nouvelle fenêtre. Ainsi la partie parser (+userCommands) est liée avec la partie Window (+image) !
+    Objectif : - résoudre le beug du redimensionnement d'une fenêtre qui survient lorsqu'il y a plus de trois fenêtres d'ouvertes.
+              - définir comment faire référence à une image ouverte dans une fenêtre : un nom, un indice ... dans l'interpreteur de commande.
+              - coder de nouvelles commandes : charger une image, fermer une fenetre, enlever une image, etc
 				   
 	       

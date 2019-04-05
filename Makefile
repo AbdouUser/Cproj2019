@@ -8,8 +8,8 @@ ALL = main
 all : $(ALL)
 
 main : main.o window.o image.o userCommands.o parser.o
-main.o : main.c window.h userCommands.h parser.h main.h
-userCommands.o : userCommands.c userCommands.h main.h window.h
+main.o : main.c window.h userCommands.h parser.h
+userCommands.o : userCommands.c userCommands.h window.h
 parser.o : parser.c parser.h
 image.o : image.c image.h
 window.o : window.c window.h image.h
