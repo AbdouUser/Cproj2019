@@ -2,7 +2,7 @@
 #define PARSER_H
 
 #define CHAR_LIMIT 500 //longueur max en char des commandes de l'utilisateur dans le shell
-#define NB_OF_FUNCTIONS 3 //Nombre de commandes totales !!ATTENTION A BIEN VERIFIER!!
+#define NB_OF_FUNCTIONS 5 //Nombre de commandes totales !!ATTENTION A BIEN VERIFIER!!
 #define NB_PARAM_MAX 5 //Ne pas modifier sans modifier la partie du main avec le switch statement
 
 //une fonction est une struct qui contient les informations necessaire au fonctionnement du parser
@@ -25,7 +25,7 @@ char* checkVar(char* s, int* pos);
 fonction* searchFunction (char* s, int* pos, fonction* funcTab);
 void normalise (char* s);
 void userCommande (char* s);
-int execParser(void);
+int execParser(fonction* tf);
 
 
 #endif

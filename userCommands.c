@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include "userCommands.h"
+#include "window.h"
 
 // Fonctions reconnues par le parser
 // Doivent pouvoir recevoir tous ses paramètres sous forme de string aka (char*)
@@ -8,6 +9,8 @@
 //    2: - mettre sa signature dans userCommands.h
 //    3: - dans la fonction initCommands créer un pointeur de la fonction intermédiaire créée plus tot puis créer un struc fonction efin  Rajouter ce struct fonction dans le tableau res
 //    4: - Pour finir il faut mettre à jour le nombre de fonction dans le fichier parser.h dans les DEFINE
+
+struct window* w;
 
 int test1(char* entier) {
   printf("\nExecution of test1 with %s",entier);
@@ -19,9 +22,14 @@ int test2(char* var, char* entier) {
   return 0;
 }
 
+int NEWWINDOW(char* var, char* entier1, char* entier2){
+  add_window(w, var, atoi(entier1), atoi(entier2));
+  return 0;
+}
 //initCommands est utilisé par le parser elle permet de lui donner les fonctions
 //Fonction qui initialise un tableau de struct fonction  passé en parametre
-void initCommands(fonction* res) {
+void initCommands(fonction* res, struct window* window) {
+  w = window;
   //test1 function
   int(*pointeurTest1)(char*);
   pointeurTest1 = test1;
@@ -30,9 +38,15 @@ void initCommands(fonction* res) {
   int(*pointeurTest2)(char*,char*);
   pointeurTest2 = test2;
   fonction f2 = {"test2" ,2,{checkVar, checkInt},pointeurTest2};
+  int(*pointeurNEWWINDOW)(char*, char*, char*);
+  pointeurNEWWINDOW = NEWWINDOW;
+  fonction f4 = {"NEWWINDOW", 3, {checkVar, checkInt, checkInt}, pointeurNEWWINDOW};
   //exit function
-  fonction exit = {"exit",0, {},NULL};
+  fonction wind = {"window",0, {},NULL};
+  fonction exit = {"exit", 0, {}, NULL};
   res[0] = f1;
   res[1] = f2;
   res[2] = exit;
+  res[3] = f4;
+  res[4] = wind;
 }

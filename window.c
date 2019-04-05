@@ -12,6 +12,8 @@ struct image_window{
 	int key_image;
 	int posx;
 	int posy;
+	SDL_Texture* texture;
+	SDL_Rect* position_texture;
 	struct image_window* next;
 };
 
@@ -123,7 +125,6 @@ void end_SDL(){
 int wait_event_react_until_quit_or_ask(struct window* w){
 	SDL_Event event;
 	while(1){
-		printf("%s\n", w->name);
 		SDL_WaitEvent(&event);
 		if(event.type == SDL_WINDOWEVENT){
 			if(event.window.event == SDL_WINDOWEVENT_CLOSE){
@@ -155,6 +156,9 @@ int wait_event_react_until_quit_or_ask(struct window* w){
 				}
 				if(tmp_w != NULL){
 					SDL_RenderClear(tmp_w->renderer); 
+					if(tmp_w->img_w != NULL && tmp_w->img_w->texture != NULL && tmp_w->img_w->position_texture != NULL){
+						SDL_RenderCopy(tmp_w->renderer, tmp_w->img_w->texture, NULL, tmp_w->img_w->position_texture);
+					}
 					SDL_RenderPresent(tmp_w->renderer);
 					SDL_UpdateWindowSurface(tmp_w->pWindow);
 				}
@@ -206,21 +210,23 @@ int load_a_image(struct window* w, char* name, char* image){
 	SDL_Texture* texture = malloc(sizeof(SDL_Texture*));
 	texture = SDL_CreateTextureFromSurface(window->renderer, get_img_by_key(i)->img);
 	//SDL_Texture* t = IMG_LoadTexture(window->renderer, "test1.jpg");
-	SDL_Rect position_texture;
-	position_texture.x = 20;
-	position_texture.y = 20;
-	position_texture.w = 400;
-	position_texture.h = 400;
+	SDL_Rect* position_texture = malloc(sizeof(SDL_Texture*));
+	position_texture->x = 0;
+	position_texture->y = 0;
+	position_texture->w = 400;
+	position_texture->h = 400;
+	window->img_w->texture = texture;
+	window->img_w->position_texture = position_texture;
 	//SDL_QueryTexture(texture, NULL, NULL, &position_texture.w, &position_texture.h);
 	SDL_RenderClear(window->renderer);
-	SDL_RenderCopy(window->renderer, texture, NULL, &position_texture);
+	SDL_RenderCopy(window->renderer, texture, NULL, position_texture);
 	SDL_RenderPresent(window->renderer);
 	SDL_UpdateWindowSurface(window->pWindow);
 	return 1; //succes
 }
 
 //un main de test
-int main(void){
+/*int main(void){
 	if(init_SDL() != 0){
 		return -1;
 	}
@@ -247,4 +253,4 @@ int main(void){
 	close_window(w);
 	end_SDL();
 	return 0;
-}
+}*/
