@@ -36,5 +36,19 @@ Membres :
     Objectif : - résoudre le beug du redimensionnement d'une fenêtre qui survient lorsqu'il y a plus de trois fenêtres d'ouvertes.
               - définir comment faire référence à une image ouverte dans une fenêtre : un nom, un indice ... dans l'interpreteur de commande.
               - coder de nouvelles commandes : charger une image, fermer une fenetre, enlever une image, etc
-				   
+				
+  12/04/2019 :
+    Nous avons résolu "le beug des trois fenêtres !". On peut maintenant ouvrir autant de fenetres qu'on veut avec la commande NEWWINDOW <name> <width> <height>, les redimmensionner, les fermer.
+    Nous avons implémenté la commande LOADIMAGE <image_name> <window_name> qui ouvrir l'image "image_name" dans la fenêtre "window_name".
+    Objectif : - Commencer le traitement d'images !
+
+
+
+
+
+
+
+
+
+
 	       

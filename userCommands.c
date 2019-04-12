@@ -51,7 +51,7 @@ void initCommands(fonction* res, struct window* window) {
   fonction f4 = {"NEWWINDOW", 3, {checkName, checkInt, checkInt}, pointeurNEWWINDOW};
   int(*pointeurLOADIMAGE)(char*, char*);
   pointeurLOADIMAGE = LOADIMAGE;
-  fonction f5 = {"LOADIMAGE", 2, {checkName, checkVar}, pointeurLOADIMAGE};
+  fonction f5 = {"LOADIMAGE", 2, {checkName, checkName}, pointeurLOADIMAGE};
   //exit function
   fonction wind = {"window",0, {},NULL};
   fonction exit = {"exit", 0, {}, NULL};
