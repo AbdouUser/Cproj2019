@@ -268,5 +268,7 @@ if (noErrorOccurred == 1){
   }while(1); //boucle infini
 }
 
+//test
+
 //Reste à faire :
 //-Ajout des pointeurs des fonctions pour leurs execution dynamique
