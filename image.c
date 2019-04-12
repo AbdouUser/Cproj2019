@@ -23,15 +23,17 @@ void init_images(){
 
 //fonction qui stock une image dans le tableau et l associe une cle 
 int get_new_key(image *img){
-	assoc_img* a_img = malloc(sizeof(assoc_img));
-	if(a_img == NULL){
-		return -1;
+ if(nb<MAX_IMG){
+		int i;		
+		for(i=0;i<MAX_IMG;i++){
+			if(assoc_img_tab[i].exist != 0){
+				assoc_img_tab[i]img=img;				
+				return i;
+			}
+		}	
 	}
-	a_img->key = nb;
-	a_img->img = img;
-	assoc_img_tab[nb] = a_img;
-	nb++;
-	return a_img->key;
+	else 
+		return -1;
 }
 
 //fonction qui cree une strucrure image pour une nouvelle image et renvoie la cle associe 
@@ -43,24 +45,35 @@ int create_img(char *path){ /***d autre parametre a propose***/
         i->name = path;
         //gestion d une eventuelle erreur....
 		return get_new_key(i);
+
+}
+
+//fonction qui cree une strucrure image pour une nouvelle image et renvoie la cle associe 
+int create_img(char *path){
+        SDL_Surface *img=NULL;
+        img=SDL_loadBMP(path);
+	if(img!=NULL)
+		return get_new_key(img);
+	else 
+		return NULL;
 }
 
 
 //recuperer la structure image de la cle key 
 image *get_img_by_key(int key){
-	if(key<MAX_IMG && key >= 0){
-		return assoc_img_tab[key]->img;
-	}
-	else{
-		return NULL;
-	}
+   if(key<MAX_IMG && assoc_img_tab[key].exist)
+	return assoc_img_tab[key].img;
+
+  else 
+	return -1;
 }
 
 // enregister l image de la cle key 
 int save(int key){
-	return 1;
-}
 
+	return 1;
+
+}
 
 //les autre fonction de traitement de l image independement des fenetres.......
 	//reourner -1 ou/et message d erreur.
