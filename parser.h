@@ -19,6 +19,7 @@ typedef struct fonction {
 
 short isAlphanumeric(char c);
 short isInteger(char c);
+char* checkName(char* s, int* pos);
 short isAlphabetic(char c);
 char* checkInt(char* s, int* pos);
 char* checkVar(char* s, int* pos);

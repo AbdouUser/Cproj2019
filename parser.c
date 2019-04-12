@@ -46,14 +46,32 @@ char* checkInt(char* s, int* pos){
   return res;
 }
 
-/*char* checkVar(char* s, int* pos){
+char* checkName(char* s, int* pos){
   char* res = malloc (sizeof (char) * CHAR_LIMIT);
   int posRes = 0;
- // if(s[*pos]!='$'){
-   // return NULL;
-  //}
-  //res[posRes]=s[*pos];
-  // *pos += 1;
+  do {
+    if (isAlphanumeric(s[*pos]) || s[*pos] == '.' ||  s[*pos] == '_' ||  s[*pos] == '-') {
+      res[posRes]=s[*pos];
+      *pos += 1;
+      posRes += 1;
+    }
+    else {
+      return NULL;
+    }
+  }
+  while (s[*pos]!=' ' && s[*pos]!='\0' &&  s[*pos]!='\n');
+  res[posRes]='\0';
+  return res;
+}
+
+char* checkVar(char* s, int* pos){
+  char* res = malloc (sizeof (char) * CHAR_LIMIT);
+  int posRes = 0;
+  if(s[*pos]!='$'){
+    return NULL;
+  }
+  res[posRes]=s[*pos];
+  *pos += 1;
   posRes += 1;
   if (!isAlphabetic(s[*pos])){
     return NULL;
@@ -72,24 +90,6 @@ char* checkInt(char* s, int* pos){
   while (s[*pos]!=' ' && s[*pos]!='\0' &&  s[*pos]!='\n');
   res[posRes]='\0';
   printf("****var %s\n", res);
-  return res;
-}*/
-
-char* checkVar(char* s, int* pos){
-  char* res = malloc(sizeof (char) * CHAR_LIMIT);
-  int posRes = 0;
-  do {
-    if (isAlphanumeric(s[*pos]) || s[*pos] == '.') {
-      res[posRes]=s[*pos];
-      *pos += 1;
-      posRes += 1;
-    }
-    else {
-      return NULL;
-    }
-  }
-  while (s[*pos]!=' ' && s[*pos]!='\0' &&  s[*pos]!='\n');
-  res[posRes]='\0';
   return res;
 }
 
