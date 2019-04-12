@@ -43,7 +43,7 @@ void initCommands(fonction* res, struct window* window) {
   fonction f2 = {"test2" ,2,{checkVar, checkInt},pointeurTest2};
   int(*pointeurNEWWINDOW)(char*, char*, char*);
   pointeurNEWWINDOW = NEWWINDOW;
-  fonction f4 = {"NEWWINDOW", 3, {checkVar, checkInt, checkInt}, pointeurNEWWINDOW};
+  fonction f4 = {"NEWWINDOW", 3, {checkName, checkInt, checkInt}, pointeurNEWWINDOW};
   //exit function
   fonction wind = {"window",0, {},NULL};
   fonction exit = {"exit", 0, {}, NULL};
