@@ -29,6 +29,11 @@ int NEWWINDOW(char* var, char* entier1, char* entier2){
   add_window(w, var, atoi(entier1), atoi(entier2));
   return 0;
 }
+
+int LOADIMAGE(char* var, char* fenetre){
+  load_a_image(w, fenetre, var);
+  return 0;
+}
 //initCommands est utilisé par le parser elle permet de lui donner les fonctions
 //Fonction qui initialise un tableau de struct fonction  passé en parametre
 void initCommands(fonction* res, struct window* window) {
@@ -44,6 +49,9 @@ void initCommands(fonction* res, struct window* window) {
   int(*pointeurNEWWINDOW)(char*, char*, char*);
   pointeurNEWWINDOW = NEWWINDOW;
   fonction f4 = {"NEWWINDOW", 3, {checkName, checkInt, checkInt}, pointeurNEWWINDOW};
+  int(*pointeurLOADIMAGE)(char*, char*);
+  pointeurLOADIMAGE = LOADIMAGE;
+  fonction f5 = {"LOADIMAGE", 2, {checkName, checkVar}, pointeurLOADIMAGE};
   //exit function
   fonction wind = {"window",0, {},NULL};
   fonction exit = {"exit", 0, {}, NULL};
@@ -52,4 +60,5 @@ void initCommands(fonction* res, struct window* window) {
   res[2] = exit;
   res[3] = f4;
   res[4] = wind;
+  res[5] = f5;
 }

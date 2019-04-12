@@ -42,7 +42,8 @@ struct window* init_window(char* name, int width, int height){
 		return NULL;
 	}
 	struct window* w = malloc(sizeof(struct window));
-	w->name = name;
+	w->name = malloc(strlen(name));
+	w->name = strcat(w->name, name);
 	w->next = NULL;
 	w->img_w = NULL;
 	w->pWindow = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
@@ -152,7 +153,7 @@ int wait_event_react_until_quit_or_ask(struct window* w){
 			else if(event.window.event == SDL_WINDOWEVENT_RESIZED){
 				struct window* tmp_w = w;
 				while(SDL_GetWindowFromID(event.window.windowID) != tmp_w->pWindow){
-					tmp_w = w->next;
+					tmp_w = tmp_w->next;
 				}
 				if(tmp_w != NULL){
 					SDL_RenderClear(tmp_w->renderer); 

@@ -89,6 +89,7 @@ char* checkVar(char* s, int* pos){
   }
   while (s[*pos]!=' ' && s[*pos]!='\0' &&  s[*pos]!='\n');
   res[posRes]='\0';
+  printf("****var %s\n", res);
   return res;
 }
 
