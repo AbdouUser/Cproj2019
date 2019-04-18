@@ -207,7 +207,7 @@ int execParser(fonction* tableauDesFonctions) {
   pos+=1;//l'espace avant chaque paramètre
   char* testParam = f->listeParam[i](input, &pos);
   if (testParam == NULL) {
-    printf("\nLe paramètre %d est inccorect\n",i+1);
+    printf("\nLe paramètre %d est incorect\n",i+1);
     noErrorOccurred = 0;
     break;
   }

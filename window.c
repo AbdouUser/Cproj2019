@@ -209,13 +209,22 @@ int load_a_image(struct window* w, char* name, char* image){
 		return -4; //erreur d'ajout d'image
 	}
 	SDL_Texture* texture = malloc(sizeof(SDL_Texture*));
-	texture = SDL_CreateTextureFromSurface(window->renderer, get_img_by_key(i)->img);
+	struct image* img = get_img_by_key(i);
+	texture = SDL_CreateTextureFromSurface(window->renderer, img->img);
 	//SDL_Texture* t = IMG_LoadTexture(window->renderer, "test1.jpg");
 	SDL_Rect* position_texture = malloc(sizeof(SDL_Texture*));
 	position_texture->x = 0;
 	position_texture->y = 0;
-	position_texture->w = 400;
-	position_texture->h = 400;
+	int w_w, w_h;
+	SDL_GetWindowSize(w->pWindow , &w_w , &w_h);
+	if(img->img->h >= img->img->w){
+		position_texture->w = (int)((float)img->img->w*((float)w_h/(float)img->img->h));
+		position_texture->h = w_h;
+	}
+	else{
+		position_texture->w = w_w;
+		position_texture->h = (int)((float)img->img->h*((float)w_w/(float)img->img->w));
+	}
 	window->img_w->texture = texture;
 	window->img_w->position_texture = position_texture;
 	//SDL_QueryTexture(texture, NULL, NULL, &position_texture.w, &position_texture.h);

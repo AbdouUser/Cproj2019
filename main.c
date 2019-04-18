@@ -7,13 +7,11 @@ int main(void){
 	init_SDL(); // on initie la SDL
 
 	 // on ouvre la première fenêtre lors du lancement du programme
-	struct window* w = init_window("F1", 600, 600);
+	struct window* w = init_window("CIMP", 600, 600);
 	if(w == NULL){ // on quitte si erreur.
 		printf("Erreur dans la création de la première fenêtre.\n");
 		exit(0);
 	}
-
-	add_window(w, "F2", 200, 200);
 
 	fonction tableauDesFonctions[NB_OF_FUNCTIONS];
 	initCommands(tableauDesFonctions, w);
