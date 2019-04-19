@@ -26,5 +26,6 @@ image *get_img_by_key(int key);
 int save(int key);
 int rotation (int key); /*** d autre parametres ....*/
 //les autre fonction de traitement de l image independement des fenetres.......
+SDL_Surface *noirEtBlanc(SDL_Surface *s);
 
 #endif

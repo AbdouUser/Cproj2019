@@ -32,7 +32,6 @@ void init_images(){
 	nb=0;
 		
 } 
-
 //fonction qui stock une image dans le tableau et l associe une cle 
 int get_new_key(image *img){
         if(nb<MAX_IMG){
@@ -81,7 +80,6 @@ void setPixel(SDL_Surface *surface, Uint8 r, Uint8 g, Uint8 b, Uint8 a, size_t x
 }
 
 
-
 // enregister l image de la cle key retourne -1 en cas d erreur
 int save(int key,const char *new_name){
     if (SDL_SaveBMP( assoc_img_tab[key].surface,new_name)< 0)
@@ -104,12 +102,12 @@ int rotation (int key,short rotation,SDL_Surface *surface,const SDL_Rect* rect){
 	for(i = rect->x; i < rect->x+rect->w; i++)
 	{
     		for(j = rect->x; j < rect->x+rect->h; j++)
-        		tem[j * surface->h +rect->x + i]=pixels[i * surface->w +rect->x + j];
+        		temp[j * surface->h +rect->x + i]=pixels[i * surface->w +rect->x + j];
 	} 
 	for(i = rect->x; i < rect->x+rect->h; i++)
 	{
     		for(j = rect->x; j < rect->x+rect->w; j++)
-        		pixels[i * surface->w +rect->x + j]=tem[i * surface->h +rect->x + j];
+        		pixels[i * surface->w +rect->x + j]=temp[i * surface->h +rect->x + j];
 	} 
 	
 	surface->pixels=pixels;
@@ -117,6 +115,41 @@ int rotation (int key,short rotation,SDL_Surface *surface,const SDL_Rect* rect){
 		
 	return 1;	
 }
-
 //les autre fonction de traitement de l image independement des fenetres.......
+
+
+SDL_Surface *noirEtBlanc(SDL_Surface *s) {
+	SDL_Surface *retour = NULL;
+	size_t i, j, w = (size_t) s->w, h = (size_t) s->h;
+	Uint32 *dst = NULL, *src = NULL;
+	if(SDL_LockSurface(s) < 0) {
+			fprintf(stderr, "Erreur SDL_LockSurface : %s", SDL_GetError());
+			goto lock_surface_fail;
+	}
+	dst = malloc((size_t)s->pitch * h);
+	if(NULL == dst) {
+			perror("Erreur malloc : ");
+			goto alloc_memory_fail;
+	}
+	src = (Uint32 *)s->pixels;
+	SDL_Color color;
+	for(i = 0; i < h; i++) {
+			for(j = 0; j < w; j++){
+					SDL_GetRGB(src[i * w *+ j], s->format,&color.r,&color.g,color.b);
+					Uint8 gris = (color.r + color.g + color.b) / 3;
+					dst[i*w+j] = SDL_MapRGB(s->format->format,gris,gris,gris);
+			}
+	}
+	retour = SDL_CreateRGBSurfaceWithFormatFrom(dst, s->w, s->h, 32, s->pitch,s->format->format);
+	if(NULL == retour) {
+			fprintf(stderr, "Erreur SDL_CreateRGBSurface : %s", SDL_GetError());
+			goto creatergbsurfacefrom_fail;
+	}
+	creatergbsurfacefrom_fail:
+			free(dst);
+	alloc_memory_fail:
+			SDL_UnlockSurface(s);
+	lock_surface_fail:
+			return retour;
+}
 
