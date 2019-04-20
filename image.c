@@ -6,66 +6,68 @@
 
 #include "image.h"
 
-typedef struct image{
-        char *name;
-	SDL_Surface *img;
-	int type;
-} image;
 
-typedef assoc_img{
-	int key;
-	short exist;
-	image *img;
-	
-} assoc_img;
-
-static assoc_img_tab[MAX_IMG];
-static nb;
-
-
-
-// lancement du module image au moment du lancement du programme avec initialisation de la table des images 
-void init_images(){
-	int i;	
-	for(i=0;i<MAX_IMG;i++)
-		assoc_img_tab[i].exist=false;
-	nb=0;
-		
-} 
 //fonction qui stock une image dans le tableau et l associe une cle 
-int get_new_key(image *img){
-        if(nb<MAX_IMG){
-		int i;		
-		for(i=0;i<MAX_IMG;i++){
-			if(assoc_img_tab[i].exist != 0){
-				assoc_img_tab[i]img=img;				
-				return i;
-			}
-		}	
+int get_New_Key(struct image *img){
+	if(img == NULL){ // pas encore d'image
+		return 0;
 	}
-	else 
-		return -1;
+	int count = img->key_image + 1;
+	struct image* img_temp = img;
+	while(img_temp->next != NULL){
+		img_temp = img_temp->next;
+		if(img_temp->key_image >= count){
+			count = img_temp->key_image + 1;
+		}
+	}
+	return count;
 }
 
-//fonction qui cree une strucrure image pour une nouvelle image et renvoie la cle associe 
-int create_img(char *path){
-        SDL_Surface *img=NULL;
-        img=SDL_loadBMP(path);
-	if(img!=NULL)
-		return get_new_key(img);
-	else 
-		return NULL;
+//return the key of the image
+struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* position_texture){
+	int key = get_New_Key(img);
+	if(img == NULL){ // pas encore d'image
+		img = malloc(sizeof(struct image));
+		if(img == NULL){
+			return NULL; //erreur d'allocation
+		}
+		img->key_image = key;
+		img->posx = 0; // en haut à gauche par défaut
+		img->posy = 0;
+		img->next = NULL;
+		img->texture = texture;
+		img->position_texture = position_texture;
+		return img; //succès
+	}
+	struct image* img_temp = img;
+	while(img_temp->next != NULL){
+		img_temp = img_temp->next;
+	}
+
+	img_temp->next = malloc(sizeof(struct image));
+	img_temp->next->key_image = key;
+	img_temp->next->posx = 0;
+	img_temp->next->posy = 0;
+	img_temp->next->next = NULL;
+	img_temp->next->texture = texture;
+	img_temp->next->position_texture = position_texture;
+	return img_temp;
 }
 
 
 //recuperer la structure image de la cle key 
-image *get_img_by_key(int key){
- 
-  if(key<MAX_IMG && assoc_img_tab[key].exist)
-	return assoc_img_tab[key].img;
-
-  else 
-	return -1;
+struct image *get_Image_By_Key(struct image* img, int key){
+	if(img == NULL) {
+		return NULL;
+	}
+	struct image *img_temp;
+	while (img_temp != NULL && img_temp->key_image != key) {
+		img_temp = img_temp->next;
+	}
+	if (img_temp->key_image == key){
+		return img_temp;
+	}
+	return NULL;
 }
 
 /************************************************************************************/
@@ -79,33 +81,26 @@ void setPixel(SDL_Surface *surface, Uint8 r, Uint8 g, Uint8 b, Uint8 a, size_t x
     pixels[y * surface->w + x] = couleur;
 }
 
-
+//A corriger pour adapter a la struct image du fichier window, on a plus une surface mais une texture.
+/*
 // enregister l image de la cle key retourne -1 en cas d erreur
-int save(int key,const char *new_name){
-    if (SDL_SaveBMP( assoc_img_tab[key].surface,new_name)< 0)
-    {
-        fprintf(stderr, "SDL_QueryTexture: %s.\n", SDL_GetError());
-	return -1;
+int save(int key,const char *new_name) {
+    if (SDL_SaveBMP( assoc_img_tab[key]->surface,new_name)< 0) {
+      fprintf(stderr, "SDL_QueryTexture: %s.\n", SDL_GetError());
+			return -1;
     }
     return 0;
-	
-
 }
-
-
-
+*/
 //rotation de l image de cle key 
 int rotation (int key,short rotation,SDL_Surface *surface,const SDL_Rect* rect){
 	Uint32 *pixels=surface->pixels,*temp;
-        int i,j;
-
-	for(i = rect->x; i < rect->x+rect->w; i++)
-	{
+  int i,j;
+	for(i = rect->x; i < rect->x+rect->w; i++) {
     		for(j = rect->x; j < rect->x+rect->h; j++)
         		temp[j * surface->h +rect->x + i]=pixels[i * surface->w +rect->x + j];
 	} 
-	for(i = rect->x; i < rect->x+rect->h; i++)
-	{
+	for(i = rect->x; i < rect->x+rect->h; i++) {
     		for(j = rect->x; j < rect->x+rect->w; j++)
         		pixels[i * surface->w +rect->x + j]=temp[i * surface->h +rect->x + j];
 	} 
@@ -115,8 +110,34 @@ int rotation (int key,short rotation,SDL_Surface *surface,const SDL_Rect* rect){
 		
 	return 1;	
 }
-//les autre fonction de traitement de l image independement des fenetres.......
 
+//les autre fonction de traitement de l image independement des fenetres
+
+SDL_Surface *createSurfaceFromTexture(SDL_Texture *texture) {
+    Uint32 format_pixels;
+    SDL_Surface *surface = NULL;
+    void *pixels = NULL;
+    int pitch, w, h;
+
+    if (SDL_QueryTexture(texture, &format_pixels, NULL, &w, &h) != 0) {
+        fprintf(stderr, "SDL_QueryTexture: %s.\n", SDL_GetError());
+        goto query_texture_fail;
+    }
+
+    if (SDL_LockTexture(texture, NULL, &pixels, &pitch) != 0) {
+        fprintf(stderr, "SDL_LockTexture: %s.\n", SDL_GetError());
+        goto lock_texture_fail;
+    }
+
+    surface = SDL_CreateRGBSurfaceWithFormatFrom(pixels, w, h, 32, w * sizeof(Uint32),format_pixels);
+    if(NULL == surface)
+        fprintf(stderr, "Erreur SDL_CreateSurfaceFrom : %s.\n", SDL_GetError());
+
+    SDL_UnlockTexture(texture);
+	lock_texture_fail:
+	query_texture_fail:
+    return surface;
+}
 
 SDL_Surface *noirEtBlanc(SDL_Surface *s) {
 	SDL_Surface *retour = NULL;

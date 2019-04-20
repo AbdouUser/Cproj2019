@@ -8,23 +8,6 @@
 #include "window.h"
 #include "image.h"
 
-struct image_window{
-	int key_image;
-	int posx;
-	int posy;
-	SDL_Texture* texture;
-	SDL_Rect* position_texture;
-	struct image_window* next;
-};
-
-struct window{
-	char* name;
-	SDL_Window* pWindow;
-	SDL_Renderer* renderer;
-	struct image_window* img_w;
-	struct window* next;
-};
-
 //initie la SDL, return 0 si initialisation réussie -1 sinon.
 int init_SDL(){
 	if(SDL_Init(SDL_INIT_VIDEO) != 0){
@@ -43,7 +26,9 @@ struct window* init_window(char* name, int width, int height){
 	}
 	struct window* w = malloc(sizeof(struct window));
 	w->name = malloc(strlen(name));
-	w->name = strcat(w->name, name);
+	// a ce moment w->name n'est pas une chaine vide mais contient des caractères exotiques
+	//w->name = strcat(w->name, name);
+	w->name = name;
 	w->next = NULL;
 	w->img_w = NULL;
 	w->pWindow = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
@@ -84,31 +69,24 @@ int add_window(struct window* w, char* name, int width, int height){
 	return 0;
 }
 
-int add_image(struct window* w, int key){
-	if(w == NULL){ // il n'y a pas encore d'image
+//return the key of the image which has been added
+int add_Image_In_Window(struct window* w, SDL_Texture* texture, SDL_Rect* position_texture){
+	if(w == NULL){ // il n'y a pas de fenetre
 		return -1; // erreur
 	}
-	if(w->img_w == NULL){ // pas encore d'image
-		w->img_w = malloc(sizeof(struct image_window));
-		if(w->img_w == NULL){
-			return -1; //erreur d'allocation
-		}
-		w->img_w->key_image = key;
-		w->img_w->posx = 0; // en haut à gauche par défaut
-		w->img_w->posy = 0;
-		w->img_w->next = NULL;
-		return 1; //succès
+	struct image* img = add_New_Image(w->img_w,texture,position_texture);
+	if (w->img_w == NULL){
+		w->img_w = img;
 	}
-	struct image_window* img_w = w->img_w;
-	while(img_w->next != NULL){
-		img_w = img_w->next;
+	printf("Image ajouté avec la key : %d\n",img->key_image);
+	return img->key_image; 
+}
+
+struct image *get_Image_By_Key_In_Window(struct window* w, int key){
+	if(w == NULL){ // il n'y a pas de fenetre
+		return NULL;
 	}
-	img_w->next = malloc(sizeof(struct image_window));
-	img_w->next->key_image = key;
-	img_w->next->posx = 0;
-	img_w->next->posy = 0;
-	img_w->next->next = NULL;
-	return 1; // succès
+	return get_Image_By_Key(w->img_w,key); 
 }
 
 //Ferme une fenetre
@@ -190,8 +168,62 @@ int wait_event_react_until_quit_or_ask(struct window* w){
 	}
 }
 
-int load_a_image(struct window* w, char* name, char* image){
+int load_An_Image(struct window* w, char* name, char* image){
 	if(w == NULL || name == NULL || image == NULL){
+		return -1;
+	}
+	struct window* window = w;
+	while(window != NULL && strcmp(window->name, name) != 0){
+		window = window->next;
+	}
+	if(window == NULL){ // pas de fenetre qui porte ce nom
+		return -2; // erreur -2;
+	}
+	
+	SDL_Surface *img=NULL;
+	img=IMG_Load(image);
+	if(img == NULL){ // erreur dans la creation de l'image
+		return -3; // erreur -3
+	}
+	SDL_Texture* texture = malloc(sizeof(SDL_Texture*));
+	texture = SDL_CreateTextureFromSurface(window->renderer, img);
+	//SDL_Texture* t = IMG_LoadTexture(window->renderer, "test1.jpg");
+	SDL_Rect* position_texture = malloc(sizeof(SDL_Texture*));
+	position_texture->x = 0;
+	position_texture->y = 0;
+	int w_w, w_h;
+	SDL_GetWindowSize(w->pWindow , &w_w , &w_h);
+	if(img->h >= img->w){
+		position_texture->w = (int)((float)img->w*((float)w_h/(float)img->h));
+		position_texture->h = w_h;
+	}
+	else{
+		position_texture->w = w_w;
+		position_texture->h = (int)((float)img->h*((float)w_w/(float)img->w));
+	}
+	int key = add_Image_In_Window(window, texture, position_texture);
+	if(key < 0){
+		return -4; //erreur d'ajout d'image
+	}
+	//SDL_QueryTexture(texture, NULL, NULL, &position_texture.w, &position_texture.h);
+	SDL_RenderClear(window->renderer);
+	SDL_RenderCopy(window->renderer, texture, NULL, position_texture);
+	SDL_RenderPresent(window->renderer);
+	SDL_UpdateWindowSurface(window->pWindow);
+	return key; //success
+}
+
+
+/*
+	Fonction qui déplace une image dans sa fenêtre :
+		w : le début de la liste chainée de fenetre
+		name : le nom de la fenêtre où se trouve l'image à déplacer
+		img_key : le nom de l'image
+		x_pixels : le nombre de pixel qu'on déplace sur x
+		y_pixels : le nombre de pixel qu'on déplace sur y
+*/
+int move_image(struct window* w, char* name, int img_key, int x_pixels, int y_pixels){
+	if(w == NULL || name == NULL){
 		return -1;
 	}
 	struct window* window = w;
@@ -201,29 +233,17 @@ int load_a_image(struct window* w, char* name, char* image){
 	if(window == NULL){ // pas de fenetre qui porte ce nom
 		return -2; // erreur -2;
 	}
-	int i = create_img(image);
-	if(i == -1){ // erreur dans la creation de l'image
-		return -3; // erreur -3
+	struct image* image = get_Image_By_Key_In_Window(window, img_key);
+	if(image == NULL){ // pas d'image avec cette key
+		return -3;
 	}
-	if(add_image(window, i) != 1){
-		return -4; //erreur d'ajout d'image
-	}
-	SDL_Texture* texture = malloc(sizeof(SDL_Texture*));
-	texture = SDL_CreateTextureFromSurface(window->renderer, get_img_by_key(i)->img);
-	//SDL_Texture* t = IMG_LoadTexture(window->renderer, "test1.jpg");
-	SDL_Rect* position_texture = malloc(sizeof(SDL_Texture*));
-	position_texture->x = 0;
-	position_texture->y = 0;
-	position_texture->w = 400;
-	position_texture->h = 400;
-	window->img_w->texture = texture;
-	window->img_w->position_texture = position_texture;
-	//SDL_QueryTexture(texture, NULL, NULL, &position_texture.w, &position_texture.h);
+	image->position_texture->x += x_pixels;
+	image->position_texture->y += y_pixels;
 	SDL_RenderClear(window->renderer);
-	SDL_RenderCopy(window->renderer, texture, NULL, position_texture);
+	SDL_RenderCopy(window->renderer, image->texture, NULL, image->position_texture);
 	SDL_RenderPresent(window->renderer);
 	SDL_UpdateWindowSurface(window->pWindow);
-	return 1; //succes
+	return 1;
 }
 
 //un main de test
@@ -247,7 +267,7 @@ int load_a_image(struct window* w, char* name, char* image){
 
 	init_images();
 
-	printf("*************** %d\n", load_a_image(w, "Fenêtre 1", "test1.jpg"));
+	printf("*************** %d\n", load_An_Image(w, "Fenêtre 1", "test1.jpg"));
 	
 	    wait_event_react_until_quit_or_ask(w);
 

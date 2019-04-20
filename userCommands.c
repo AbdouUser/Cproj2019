@@ -30,8 +30,26 @@ int NEWWINDOW(char* var, char* entier1, char* entier2){
   return 0;
 }
 
-int LOADIMAGE(char* var, char* fenetre){
-  load_a_image(w, fenetre, var);
+int LOADIMAGE(char* image, char* fenetre){
+  int err = load_An_Image(w, fenetre, image);
+  switch (err)
+  {
+  case -1:
+    printf("Un argument est est null.\n");
+    break;
+  case -2:
+    printf("Pas de fenetre du nom %s.\n",fenetre);
+    break;
+  case -3:
+    printf("Erreur dans la creation de l'image.\n");
+    break;
+  case -4:
+    printf("Erreur dans l'ajout de l'image dans la fenetre.\n");
+    break;
+  default:
+    printf("L'image %s a bien été chargée dans la fenêtre %s.\n",image, fenetre);
+    break;
+  }
   return 0;
 }
 //initCommands est utilisé par le parser elle permet de lui donner les fonctions
