@@ -93,7 +93,7 @@ void initCommands(fonction* res, struct window* window) {
   fonction f5 = {"LOADIMAGE", 2, {checkName, checkName}, pointeurLOADIMAGE};
   int(*pointeurMOVEIMAGE)(char*, char*, char*, char*);
   pointeurMOVEIMAGE = MOVEIMAGE;
-  fonction f6 = {"MOVEIMAGE", 2, {checkName, checkInt, checkInt, checkInt}, pointeurMOVEIMAGE};
+  fonction f6 = {"MOVEIMAGE", 4, {checkName, checkInt, checkInt, checkInt}, pointeurMOVEIMAGE};
   //exit function
   fonction wind = {"window",0, {},NULL};
   fonction exit = {"exit", 0, {}, NULL};
