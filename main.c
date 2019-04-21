@@ -16,10 +16,12 @@ int main(void){
 	fonction tableauDesFonctions[NB_OF_FUNCTIONS];
 	initCommands(tableauDesFonctions, w);
 
+	//For testing purpose :
 	int papKey = load_An_Image(w,"CIMP","papillon.jpg");
 	move_image(w,"CIMP",papKey,50,50);
+	struct image* img = get_Image_By_Key_In_Window(w,papKey);
 
-
+	
 
 	// boucle principale
 	while(1){

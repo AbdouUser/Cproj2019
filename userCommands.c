@@ -52,6 +52,27 @@ int LOADIMAGE(char* image, char* fenetre){
   }
   return 0;
 }
+
+int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy){
+  int err = move_image(w,fenetre,atoi(key),atoi(posx),atoi(posy));
+  switch (err)
+  {
+  case -1:
+    printf("Un argument est est null.\n");
+    break;
+  case -2:
+    printf("Pas de fenetre du nom %s.\n",fenetre);
+    break;
+  case -3:
+    printf("Pas d'image de key %s.\n",key);
+    break;
+  default:
+    printf("L'image de key %s a bien été déplacée dans la fenêtre %s.\n",key, fenetre);
+    break;
+  }
+  return 0;
+}
+
 //initCommands est utilisé par le parser elle permet de lui donner les fonctions
 //Fonction qui initialise un tableau de struct fonction  passé en parametre
 void initCommands(fonction* res, struct window* window) {
@@ -70,6 +91,9 @@ void initCommands(fonction* res, struct window* window) {
   int(*pointeurLOADIMAGE)(char*, char*);
   pointeurLOADIMAGE = LOADIMAGE;
   fonction f5 = {"LOADIMAGE", 2, {checkName, checkName}, pointeurLOADIMAGE};
+  int(*pointeurMOVEIMAGE)(char*, char*, char*, char*);
+  pointeurMOVEIMAGE = MOVEIMAGE;
+  fonction f6 = {"MOVEIMAGE", 2, {checkName, checkInt, checkInt, checkInt}, pointeurMOVEIMAGE};
   //exit function
   fonction wind = {"window",0, {},NULL};
   fonction exit = {"exit", 0, {}, NULL};
@@ -79,4 +103,5 @@ void initCommands(fonction* res, struct window* window) {
   res[3] = f4;
   res[4] = wind;
   res[5] = f5;
+  res[6] = f6;
 }
