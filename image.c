@@ -57,15 +57,12 @@ struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* p
 
 //recuperer la structure image de la cle key 
 struct image *get_Image_By_Key(struct image* img, int key){
-	if(img == NULL) {
-		return NULL;
-	}
-	struct image *img_temp;
-	while (img_temp != NULL && img_temp->key_image != key) {
+	struct image *img_temp = img;
+	while (img_temp != NULL) {
+		if (img_temp->key_image == key){
+			return img_temp;
+		}
 		img_temp = img_temp->next;
-	}
-	if (img_temp->key_image == key){
-		return img_temp;
 	}
 	return NULL;
 }
