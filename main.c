@@ -7,7 +7,7 @@ int main(void){
 	init_SDL(); // on initie la SDL
 
 		// on ouvre la première fenêtre lors du lancement du programme
-	struct window* w = init_window("CIMP", 600, 300);
+	struct window* w = init_window("CIMP", 800, 500);
 	if(w == NULL){ // on quitte si erreur.
 		printf("Erreur dans la création de la première fenêtre.\n");
 		exit(0);
@@ -17,9 +17,14 @@ int main(void){
 	initCommands(tableauDesFonctions, w);
 
 	//For testing purpose :
-	int papKey = load_An_Image(w,"CIMP","papillon.jpg");
-	move_image(w,"CIMP",papKey,50,50);
-	struct image* img = get_Image_By_Key_In_Window(w,papKey);
+	/*
+	int key = load_An_Image(w,"CIMP","papillon.jpg");
+	key = load_An_Image(w,"CIMP","test80.png");
+	key = load_An_Image(w,"CIMP","test80.png");
+	move_image(w,"CIMP",key,80,0);
+	key = load_An_Image(w,"CIMP","test80.png");
+	move_image(w,"CIMP",key,160,0);
+	*/
 
 	
 

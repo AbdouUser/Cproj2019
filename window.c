@@ -168,6 +168,18 @@ int wait_event_react_until_quit_or_ask(struct window* w){
 	}
 }
 
+//Refresh a window / clear the window and draw all the image.
+void refreshWindow(struct window* w){
+	SDL_RenderClear(w->renderer);
+	struct image* img = w->img_w;
+	while (img != NULL) {
+		SDL_RenderCopy(w->renderer, img->texture, NULL, img->position_texture);
+		img = img->next;
+	}
+	SDL_RenderPresent(w->renderer);
+	SDL_UpdateWindowSurface(w->pWindow);
+}
+
 int load_An_Image(struct window* w, char* name, char* image){
 	if(w == NULL || name == NULL || image == NULL){
 		return -1;
@@ -182,6 +194,8 @@ int load_An_Image(struct window* w, char* name, char* image){
 	
 	SDL_Surface *img=NULL;
 	img=IMG_Load(image);
+	int x = img->w;
+	int y = img->h;
 	if(img == NULL){ // erreur dans la creation de l'image
 		return -3; // erreur -3
 	}
@@ -191,6 +205,9 @@ int load_An_Image(struct window* w, char* name, char* image){
 	SDL_Rect* position_texture = malloc(sizeof(SDL_Texture*));
 	position_texture->x = 0;
 	position_texture->y = 0;
+	position_texture->w = x;
+	position_texture->h = y;
+	/*
 	int w_w, w_h;
 	SDL_GetWindowSize(w->pWindow , &w_w , &w_h);
 	if(img->h >= img->w){
@@ -201,15 +218,13 @@ int load_An_Image(struct window* w, char* name, char* image){
 		position_texture->w = w_w;
 		position_texture->h = (int)((float)img->h*((float)w_w/(float)img->w));
 	}
+	*/
+	//SDL_QueryTexture(texture, NULL, NULL, &position_texture->w, &position_texture->h);
 	int key = add_Image_In_Window(window, texture, position_texture);
 	if(key < 0){
 		return -4; //erreur d'ajout d'image
 	}
-	//SDL_QueryTexture(texture, NULL, NULL, &position_texture.w, &position_texture.h);
-	SDL_RenderClear(window->renderer);
-	SDL_RenderCopy(window->renderer, texture, NULL, position_texture);
-	SDL_RenderPresent(window->renderer);
-	SDL_UpdateWindowSurface(window->pWindow);
+	refreshWindow(window);
 	return key; //success
 }
 
@@ -239,10 +254,7 @@ int move_image(struct window* w, char* name, int img_key, int x_pixels, int y_pi
 	}
 	image->position_texture->x += x_pixels;
 	image->position_texture->y += y_pixels;
-	SDL_RenderClear(window->renderer);
-	SDL_RenderCopy(window->renderer, image->texture, NULL, image->position_texture);
-	SDL_RenderPresent(window->renderer);
-	SDL_UpdateWindowSurface(window->pWindow);
+	refreshWindow(w);
 	return 1;
 }
 

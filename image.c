@@ -12,15 +12,15 @@ int get_New_Key(struct image *img){
 	if(img == NULL){ // pas encore d'image
 		return 0;
 	}
-	int count = img->key_image + 1;
+	int count = img->key_image;
 	struct image* img_temp = img;
-	while(img_temp->next != NULL){
-		img_temp = img_temp->next;
-		if(img_temp->key_image >= count){
-			count = img_temp->key_image + 1;
+	while(img_temp != NULL){
+		if(img_temp->key_image > count){
+			count = img_temp->key_image;
 		}
+		img_temp = img_temp->next;
 	}
-	return count;
+	return count + 1;
 }
 
 //return the key of the image
@@ -43,7 +43,6 @@ struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* p
 	while(img_temp->next != NULL){
 		img_temp = img_temp->next;
 	}
-
 	img_temp->next = malloc(sizeof(struct image));
 	img_temp->next->key_image = key;
 	img_temp->next->posx = 0;
@@ -51,7 +50,7 @@ struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* p
 	img_temp->next->next = NULL;
 	img_temp->next->texture = texture;
 	img_temp->next->position_texture = position_texture;
-	return img_temp;
+	return img_temp->next;
 }
 
 
