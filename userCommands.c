@@ -73,6 +73,43 @@ int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy){
   return 0;
 }
 
+//with the -1 key it will modifie all the window 
+//the -1 key doesn't work yet
+int BLACKANDWHITE(char* fenetre, char* key) {
+  struct window* window = getWindow(w,fenetre);
+  if (window == NULL) {
+    printf("Pas de fenetre du nom %s.\n",fenetre);
+    return 0;
+  }
+  SDL_Rect* rectangle =malloc(sizeof(SDL_Rect));
+  SDL_Texture* texture;
+  if(atoi(key) == -1) {
+    int w,h;
+    SDL_GetWindowSize(window->pWindow,&w,&h);
+    rectangle->h = h;
+    rectangle->w = w;
+    rectangle->x = 0;
+    rectangle->y = 0;
+    texture = SDL_CreateTexture(window->renderer,SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_STREAMING,w,h);
+  }
+  else {
+	  struct image* img = get_Image_By_Key_In_Window(window, atoi(key));
+    if (img == NULL){
+      printf("Pas d'image de key %s.\n",key);
+      return 0;
+    }
+    rectangle = img->position_texture;
+    texture = img->texture;
+  }
+	int t = blackAndWhite(w->renderer,rectangle,texture);
+	if (t != 0 ){
+		printf("Erreur pendant le traitement de l'image.");
+    return 0;
+	}
+	refreshWindow(w);
+  return 1;
+}
+
 //initCommands est utilisé par le parser elle permet de lui donner les fonctions
 //Fonction qui initialise un tableau de struct fonction  passé en parametre
 void initCommands(fonction* res, struct window* window) {
@@ -94,6 +131,9 @@ void initCommands(fonction* res, struct window* window) {
   int(*pointeurMOVEIMAGE)(char*, char*, char*, char*);
   pointeurMOVEIMAGE = MOVEIMAGE;
   fonction f6 = {"MOVEIMAGE", 4, {checkName, checkInt, checkInt, checkInt}, pointeurMOVEIMAGE};
+  int(*pointeurBLACKANDWHITE)(char*, char*);
+  pointeurBLACKANDWHITE = BLACKANDWHITE;
+  fonction f7 = {"BLACKANDWHITE", 2, {checkName, checkInt}, pointeurBLACKANDWHITE};
   //exit function
   fonction wind = {"window",0, {},NULL};
   fonction exit = {"exit", 0, {}, NULL};
@@ -104,4 +144,5 @@ void initCommands(fonction* res, struct window* window) {
   res[4] = wind;
   res[5] = f5;
   res[6] = f6;
+  res[7] = f7;
 }

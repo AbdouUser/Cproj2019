@@ -69,6 +69,17 @@ int add_window(struct window* w, char* name, int width, int height){
 	return 0;
 }
 
+struct window* getWindow (struct window* w, char* windowName) {
+	if (w == NULL){
+		return NULL;
+	}
+	struct window* window = w;
+	while(window != NULL && strcmp(window->name, windowName) != 0){
+		window = window->next;
+	}
+	return window;
+}
+
 //return the key of the image which has been added
 int add_Image_In_Window(struct window* w, SDL_Texture* texture, SDL_Rect* position_texture){
 	if(w == NULL){ // il n'y a pas de fenetre
@@ -194,11 +205,11 @@ int load_An_Image(struct window* w, char* name, char* image){
 	
 	SDL_Surface *img=NULL;
 	img=IMG_Load(image);
-	int x = img->w;
-	int y = img->h;
 	if(img == NULL){ // erreur dans la creation de l'image
 		return -3; // erreur -3
 	}
+	int x = img->w;
+	int y = img->h;
 	SDL_Texture* texture = malloc(sizeof(SDL_Texture*));
 	texture = SDL_CreateTextureFromSurface(window->renderer, img);
 	//SDL_Texture* t = IMG_LoadTexture(window->renderer, "test1.jpg");
@@ -241,10 +252,7 @@ int move_image(struct window* w, char* name, int img_key, int x_pixels, int y_pi
 	if(w == NULL || name == NULL){
 		return -1;
 	}
-	struct window* window = w;
-	while(strcmp(window->name, name) != 0 && window != NULL){
-		window = window->next;
-	}
+	struct window* window = getWindow(w,name);
 	if(window == NULL){ // pas de fenetre qui porte ce nom
 		return -2; // erreur -2;
 	}

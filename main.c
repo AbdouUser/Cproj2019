@@ -19,6 +19,13 @@ int main(void){
 	//For testing purpose :
 	/*
 	int key = load_An_Image(w,"CIMP","papillon.jpg");
+	struct image* img = get_Image_By_Key_In_Window(w, key);
+	int t = blackAndWhite(w->renderer,img->position_texture,img->texture);
+	if (t != 0 ){
+		printf("err dans le traitement image");
+	}
+	refreshWindow(w);
+	
 	key = load_An_Image(w,"CIMP","test80.png");
 	key = load_An_Image(w,"CIMP","test80.png");
 	move_image(w,"CIMP",key,80,0);
