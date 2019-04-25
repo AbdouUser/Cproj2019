@@ -46,6 +46,45 @@ char* checkInt(char* s, int* pos){
   return res;
 }
 
+char* checkDouble(char* s, int* pos){
+  char* res = malloc(sizeof(char)*CHAR_LIMIT);
+  int posRes = 0;
+  if(s[*pos] == '-'){
+    res[posRes] = s[*pos];
+    *pos +=1;
+    posRes+=1;
+  }
+  do{
+    if(isInteger(s[*pos])){
+      res[posRes]=s[*pos];
+      *pos+=1;
+      posRes +=1;
+    }
+    else{
+      return NULL;
+    }
+  }while(s[*pos]!= ' ' && s[*pos]!='\0' && s[*pos]!='\n' && s[*pos]!='.');
+  if(s[*pos]!='.'){
+    res[posRes]='\0';
+    return res;
+  }
+  res[posRes] = s[*pos];
+  *pos +=1;
+  posRes+=1;
+  do{
+    if(isInteger(s[*pos])){
+      res[posRes] = s[*pos];
+      *pos +=1;
+      posRes+=1;
+    }
+    else{
+      return NULL;
+    }
+  }while(s[*pos]!= ' ' && s[*pos]!='\0' && s[*pos]!='\n');
+  res[posRes]='\0';
+  return res;
+}
+
 char* checkName(char* s, int* pos){
   char* res = malloc (sizeof (char) * CHAR_LIMIT);
   int posRes = 0;

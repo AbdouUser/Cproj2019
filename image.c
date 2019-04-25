@@ -62,9 +62,16 @@ struct image *get_Image_By_Key(struct image* img, int key){
 	return NULL;
 }
 
+//change la taille d'une image donnée
 void set_size(struct image* img, int width, int height){
 	img->position_texture->w = width;
 	img->position_texture->h = height;
+}
+
+//applique un facteur de zoom à une image donée
+void zoom_on_a_image(struct image* img, double zoom){
+	img->position_texture->w = (int)(((double)img->position_texture->w)*zoom);
+	img->position_texture->h = (int)(((double)img->position_texture->h)*zoom);
 }
 
 

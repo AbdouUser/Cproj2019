@@ -292,6 +292,127 @@ int resize_image(struct window* w, char* name_w, int img_key, int width, int hei
 	return 1;
 }
 
+//applique un facteur de zoom sur l'image de key img_key dans la fenetre name_w
+int zoom_image(struct window* w, char* name_w, int img_key, double zoom){
+	if(w == NULL || name_w == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	struct image* image = get_Image_By_Key_In_Window(window, img_key);
+	if(image == NULL){ // pas d'image avec cette key
+		return -3;
+	}
+	zoom_on_a_image(image, zoom);
+	refreshWindow(window);
+	printf("%s %d : %d x %d\n", name_w, img_key, image->position_texture->w, image->position_texture->h);
+	return 1;
+}
+
+//effectue un zoom sur toute une window
+int zoom_window(struct window* w, char* name_w, double zoom){
+	if(w == NULL || name_w == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	if(window->img_w == NULL){ // aucune image
+		return 1;
+	}
+	struct image* image = window->img_w;
+	while(image != NULL){
+		zoom_on_a_image(image, zoom);
+		image = image->next;
+	}
+	refreshWindow(window);
+	return 1;
+}
+
+int remove_image(struct window* w, char* name_w, int img_key){
+	if(w == NULL || name_w == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	if(window->img_w == NULL){
+		return -3;
+	}
+	struct image* image = window->img_w;
+	if(image->key_image == img_key){ // c'est la première image
+		window->img_w = image->next;
+		free(image);
+		refreshWindow(window);
+		return 1;
+	}
+	while(image->next != NULL && image->next->key_image != img_key){
+		image = image->next;
+	}
+	if(image->next == NULL){
+		return -3;
+	}
+	struct image* i_suppr = image->next; // on la stocke pour pouvoir la free
+	image->next = image->next->next;
+	free(i_suppr);
+	refreshWindow(window);
+	return 1;
+}
+
+int image_to_first_plan(struct window* w, char* name_w, int img_key){
+	if(w == NULL || name_w == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	if(window->img_w == NULL){
+		return -3;
+	}
+	if(window->img_w->next == NULL){ // une seule image
+		return 1;
+	}
+
+	struct image* test = window->img_w;
+	while(test != NULL){
+		test = test->next;
+	}
+
+	struct image* image = window->img_w;
+	struct image* image_s;
+	if(image->key_image == img_key){ 
+		image_s = image;
+		window->img_w = image->next;
+	}
+	else{
+		while(image->next != NULL && image->next->key_image != img_key){
+			image = image->next;
+		}
+		if(image->next == NULL){
+			return -3;
+		}
+		image_s = image->next;
+		image->next = image->next->next;
+	}
+	image_s->next = NULL; // c'est la dernière image
+	image = window->img_w;
+	while(image->next != NULL){ // on va à la dernière image
+		image = image->next;
+	}
+	image->next = image_s; // on ajoute notre image
+	test = window->img_w;
+	while(test != NULL){
+		test = test->next;
+	}
+	refreshWindow(window);
+	return 1;
+}
+
 //un main de test
 /*int main(void){
 	if(init_SDL() != 0){

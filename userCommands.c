@@ -98,6 +98,60 @@ int RESIZEIMAGE(char* fenetre, char* key, char* width, char* height){
   return 0;
 
 }
+/*  
+* Commande ZOOMIMAGE <fenetre> <key_image> <zoom>
+* zoom est un facteur de zoom 0.1, 2 etc..
+*/
+int ZOOMIMAGE(char* fenetre, char* key, char* zoom){
+  switch(zoom_image(w, fenetre, atoi(key), atof(zoom))){
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("Le zoom sur l'image de key %s a bien été effectué dans la fenêtre %s.\n", key, fenetre); break;
+  }
+  return 0;
+}
+
+/*  
+* Commande ZOOMIMAGE <fenetre> <zoom>
+* zoom est un facteur de zoom 0.1, 2 etc..
+*/
+int ZOOMWINDOW(char* fenetre, char* zoom){
+  switch(zoom_window(w, fenetre, atof(zoom))){
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    default: printf("Le zoom a bien été effectué dans la fenêtre %s.\n", fenetre); break;
+  }
+  return 0;
+}
+
+/*
+* Commande REMOVEIMAGE <fenetre> <key_image>
+* supprime l'image
+*/
+int REMOVEIMAGE(char* fenetre, char* key){
+  switch(remove_image(w, fenetre, atoi(key))){
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("L'image de key %s a bien été supprimée dans la fenêtre %s.\n", key, fenetre); break;
+  }
+  return 0;
+}
+
+/*
+* Commande FIRSTPLANIMAGE <fenetre> <key_image>
+* met l'image de key key_image en premier plan
+*/
+int FIRSTPLANIMAGE(char* fenetre, char* key){
+  switch(image_to_first_plan(w, fenetre, atoi(key))){
+     case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("L'image de key %s a bien été mise au premier plan dans la fenêtre %s.\n", key, fenetre); break;
+  }
+  return 0;
+}
 
 //TODO :
 //CREATESELECTION
@@ -137,6 +191,20 @@ void initCommands(fonction* res, struct window* window) {
   int(*pointeurRESIZEIMAGE)(char*, char*, char*, char*);
   pointeurRESIZEIMAGE = RESIZEIMAGE;
   fonction f7 = {"RESIZEIMAGE", 4, {checkName, checkInt, checkInt, checkInt}, pointeurRESIZEIMAGE};
+  int(*pointeurZOOMIMAGE)(char*, char*, char*);
+  pointeurZOOMIMAGE = ZOOMIMAGE;
+  fonction f8 = {"ZOOMIMAGE", 3, {checkName, checkInt, checkDouble}, pointeurZOOMIMAGE};
+  int(*pointeurZOOMWINDOW)(char*, char*);
+  pointeurZOOMWINDOW = ZOOMWINDOW;
+  fonction f9 = {"ZOOMWINDOW", 2, {checkName, checkDouble}, pointeurZOOMWINDOW}; 
+  int(*pointeurFIRSTPLANIMAGE)(char*, char*);
+  pointeurFIRSTPLANIMAGE = FIRSTPLANIMAGE;
+  fonction f10 = {"FIRSTPLANIMAGE", 2, {checkName, checkName}, pointeurFIRSTPLANIMAGE}; 
+  int(*pointeurREMOVEIMAGE)(char*, char*);
+  pointeurREMOVEIMAGE = REMOVEIMAGE;
+  fonction f11 = {"REMOVEIMAGE", 2, {checkName, checkName}, pointeurREMOVEIMAGE}; 
+
+
   //exit function
   fonction wind = {"window",0, {},NULL};
   fonction exit = {"exit", 0, {}, NULL};
@@ -148,4 +216,8 @@ void initCommands(fonction* res, struct window* window) {
   res[5] = f5;
   res[6] = f6;
   res[7] = f7;
+  res[8] = f8;
+  res[9] = f9;
+  res[10] = f10;
+  res[11] = f11;
 }

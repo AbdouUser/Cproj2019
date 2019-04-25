@@ -30,4 +30,9 @@ int load_An_Image(struct window* w, char* name, char* image);
 int move_image(struct window* w, char* name, int img_key, int x_pixels, int y_pixels);
 void refreshWindow(struct window* w);
 int resize_image(struct window* w, char* name_w, int img_key, int width, int height);
+int zoom_image(struct window* w, char* name_w, int img_key, double zoom);
+int zoom_window(struct window* w, char* name_w, double zoom);
+int remove_image(struct window* w, char* name_w, int img_key);
+int image_to_first_plan(struct window* w, char* name_w, int img_key);
+
 #endif
