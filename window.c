@@ -27,8 +27,7 @@ struct window* init_window(char* name, int width, int height){
 	struct window* w = malloc(sizeof(struct window));
 	w->name = malloc(strlen(name));
 	// a ce moment w->name n'est pas une chaine vide mais contient des caractères exotiques
-	//w->name = strcat(w->name, name);
-	w->name = name;
+	w->name = strcat(w->name, name);
 	w->next = NULL;
 	w->img_w = NULL;
 	w->pWindow = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
@@ -271,7 +270,25 @@ int move_image(struct window* w, char* name, int img_key, int x_pixels, int y_pi
 	}
 	image->position_texture->x += x_pixels;
 	image->position_texture->y += y_pixels;
-	refreshWindow(w);
+	refreshWindow(window);
+	return 1;
+}
+
+int resize_image(struct window* w, char* name_w, int img_key, int width, int height){
+	if(w == NULL || name_w == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	// on récupère l'image
+	struct image* image = get_Image_By_Key_In_Window(window, img_key);
+	if(image == NULL){ // pas d'image avec cette key
+		return -3;
+	}
+	set_size(image, width, height);
+	refreshWindow(window);
 	return 1;
 }
 

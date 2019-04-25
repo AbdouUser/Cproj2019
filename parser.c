@@ -50,7 +50,7 @@ char* checkName(char* s, int* pos){
   char* res = malloc (sizeof (char) * CHAR_LIMIT);
   int posRes = 0;
   do {
-    if (isAlphanumeric(s[*pos]) || s[*pos] == '.' ||  s[*pos] == '_' ||  s[*pos] == '-') {
+    if (isAlphanumeric(s[*pos]) || s[*pos] == '.' ||  s[*pos] == '_' ||  s[*pos] == '-' || s[*pos] == '/') {
       res[posRes]=s[*pos];
       *pos += 1;
       posRes += 1;

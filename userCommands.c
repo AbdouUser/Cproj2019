@@ -30,6 +30,11 @@ int NEWWINDOW(char* var, char* entier1, char* entier2){
   return 0;
 }
 
+/*
+* Commande LOADIMAGE <image> <fenetre> 
+* ou image est le chemin de l'image
+*/
+
 int LOADIMAGE(char* image, char* fenetre){
   int err = load_An_Image(w, fenetre, image);
   switch (err)
@@ -53,6 +58,10 @@ int LOADIMAGE(char* image, char* fenetre){
   return 0;
 }
 
+/*
+* Commande MOVEIMAGE <fenetre> <key_image> <x> <y>
+*/
+
 int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy){
   int err = move_image(w,fenetre,atoi(key),atoi(posx),atoi(posy));
   switch (err)
@@ -61,7 +70,7 @@ int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy){
     printf("Un argument est est null.\n");
     break;
   case -2:
-    printf("Pas de fenetre du nom %s.\n",fenetre);
+    printf("Pas de fenêtre du nom %s.\n",fenetre);
     break;
   case -3:
     printf("Pas d'image de key %s.\n",key);
@@ -73,50 +82,21 @@ int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy){
   return 0;
 }
 
-//with the -1 key it will modifie all the images and selections in the window
-//the -1 key doesn't work yet
-int GREYLEVELS(char* fenetre, char* key) {
-  struct window* window = getWindow(w,fenetre);
-  if (window == NULL) {
-    printf("Pas de fenetre du nom %s.\n",fenetre);
-    return 0;
+/*
+ * Commande RESIZEIMAGE <fenetre> <key_image> <new_width> <new_height>
+*/
+
+int RESIZEIMAGE(char* fenetre, char* key, char* width, char* height){
+
+  switch(resize_image(w, fenetre, atoi(key), atoi(width), atoi(height))){
+
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("L'image de key %s a bien été redimmensionnée dans la fenêtre %s.\n", key, fenetre); break;
   }
-  SDL_Rect* rectangle = malloc(sizeof(SDL_Rect));
-  SDL_Texture* texture;
-  if(atoi(key) == -1) {
-	  struct image* img = window->img_w;
-    while(img != NULL) {
-      rectangle = img->position_texture;
-      texture = img->texture;
-      int t = greyLevels(window->renderer,rectangle,texture);
-      if (t != 0 ){
-        printf("Erreur pendant le traitement d'une des images.");
-        return 0;
-      }
-      if(img->next != NULL){
-        img = img->next;
-      }
-      else{
-        break;
-      }
-    }
-  }
-  else {
-	  struct image* img = get_Image_By_Key_In_Window(window, atoi(key));
-    if (img == NULL){
-      printf("Pas d'image de key %s.\n",key);
-      return 0;
-    }
-    rectangle = img->position_texture;
-    texture = img->texture;
-    int t = greyLevels(window->renderer,rectangle,texture);
-    if (t != 0 ){
-      printf("Erreur pendant le traitement de l'image.");
-      return 0;
-    }
-  }
-	refreshWindow(window);
-  return 1;
+  return 0;
+
 }
 
 //TODO :
@@ -154,9 +134,9 @@ void initCommands(fonction* res, struct window* window) {
   int(*pointeurMOVEIMAGE)(char*, char*, char*, char*);
   pointeurMOVEIMAGE = MOVEIMAGE;
   fonction f6 = {"MOVEIMAGE", 4, {checkName, checkInt, checkInt, checkInt}, pointeurMOVEIMAGE};
-  int(*pointeurGREYLEVELS)(char*, char*);
-  pointeurGREYLEVELS = GREYLEVELS;
-  fonction f7 = {"GREYLEVELS", 2, {checkName, checkInt}, pointeurGREYLEVELS};
+  int(*pointeurRESIZEIMAGE)(char*, char*, char*, char*);
+  pointeurRESIZEIMAGE = RESIZEIMAGE;
+  fonction f7 = {"RESIZEIMAGE", 4, {checkName, checkInt, checkInt, checkInt}, pointeurRESIZEIMAGE};
   //exit function
   fonction wind = {"window",0, {},NULL};
   fonction exit = {"exit", 0, {}, NULL};

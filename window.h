@@ -29,4 +29,5 @@ int wait_event_react_until_quit_or_ask();
 int load_An_Image(struct window* w, char* name, char* image);
 int move_image(struct window* w, char* name, int img_key, int x_pixels, int y_pixels);
 void refreshWindow(struct window* w);
+int resize_image(struct window* w, char* name_w, int img_key, int width, int height);
 #endif
