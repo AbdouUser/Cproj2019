@@ -12,6 +12,6 @@ void initCommands(fonction* res, struct window* w);
 int NEWWINDOW(char* var, char* entier1, char* entier2);
 int LOADIMAGE(char* var, char* fenetre);
 int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy);
-int BLACKANDWHITE(char* fenetre, char* key);
+int GREYLEVELS(char* fenetre, char* key);
 
 #endif

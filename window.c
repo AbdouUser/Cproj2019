@@ -145,12 +145,15 @@ int wait_event_react_until_quit_or_ask(struct window* w){
 					tmp_w = tmp_w->next;
 				}
 				if(tmp_w != NULL){
+					/*
 					SDL_RenderClear(tmp_w->renderer); 
 					if(tmp_w->img_w != NULL && tmp_w->img_w->texture != NULL && tmp_w->img_w->position_texture != NULL){
 						SDL_RenderCopy(tmp_w->renderer, tmp_w->img_w->texture, NULL, tmp_w->img_w->position_texture);
 					}
 					SDL_RenderPresent(tmp_w->renderer);
 					SDL_UpdateWindowSurface(tmp_w->pWindow);
+					*/
+					refreshWindow(tmp_w);
 				}
 			}
 		}
@@ -184,11 +187,17 @@ void refreshWindow(struct window* w){
 	SDL_RenderClear(w->renderer);
 	struct image* img = w->img_w;
 	while (img != NULL) {
-		SDL_RenderCopy(w->renderer, img->texture, NULL, img->position_texture);
+		if (SDL_RenderCopy(w->renderer, img->texture, NULL, img->position_texture) != 0){
+			SDL_GetError();
+		}
 		img = img->next;
 	}
 	SDL_RenderPresent(w->renderer);
-	SDL_UpdateWindowSurface(w->pWindow);
+	SDL_GetWindowSurface(w->pWindow);
+	if (SDL_UpdateWindowSurface(w->pWindow) != 0){
+		SDL_GetError();
+	}
+	
 }
 
 int load_An_Image(struct window* w, char* name, char* image){

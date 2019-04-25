@@ -73,24 +73,33 @@ int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy){
   return 0;
 }
 
-//with the -1 key it will modifie all the window 
+//with the -1 key it will modifie all the images and selections in the window
 //the -1 key doesn't work yet
-int BLACKANDWHITE(char* fenetre, char* key) {
+int GREYLEVELS(char* fenetre, char* key) {
   struct window* window = getWindow(w,fenetre);
   if (window == NULL) {
     printf("Pas de fenetre du nom %s.\n",fenetre);
     return 0;
   }
-  SDL_Rect* rectangle =malloc(sizeof(SDL_Rect));
+  SDL_Rect* rectangle = malloc(sizeof(SDL_Rect));
   SDL_Texture* texture;
   if(atoi(key) == -1) {
-    int w,h;
-    SDL_GetWindowSize(window->pWindow,&w,&h);
-    rectangle->h = h;
-    rectangle->w = w;
-    rectangle->x = 0;
-    rectangle->y = 0;
-    texture = SDL_CreateTexture(window->renderer,SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_STREAMING,w,h);
+	  struct image* img = window->img_w;
+    while(img != NULL) {
+      rectangle = img->position_texture;
+      texture = img->texture;
+      int t = greyLevels(window->renderer,rectangle,texture);
+      if (t != 0 ){
+        printf("Erreur pendant le traitement d'une des images.");
+        return 0;
+      }
+      if(img->next != NULL){
+        img = img->next;
+      }
+      else{
+        break;
+      }
+    }
   }
   else {
 	  struct image* img = get_Image_By_Key_In_Window(window, atoi(key));
@@ -100,15 +109,29 @@ int BLACKANDWHITE(char* fenetre, char* key) {
     }
     rectangle = img->position_texture;
     texture = img->texture;
+    int t = greyLevels(window->renderer,rectangle,texture);
+    if (t != 0 ){
+      printf("Erreur pendant le traitement de l'image.");
+      return 0;
+    }
   }
-	int t = blackAndWhite(w->renderer,rectangle,texture);
-	if (t != 0 ){
-		printf("Erreur pendant le traitement de l'image.");
-    return 0;
-	}
-	refreshWindow(w);
+	refreshWindow(window);
   return 1;
 }
+
+//TODO :
+//CREATESELECTION
+//RESIZE
+//CHANGEBORDERS
+//FILL
+//REPLACE
+//BLACKANDWHITE
+//NEGATIVE
+//COPY
+//CUT
+//PASTE
+//SAVE
+
 
 //initCommands est utilisé par le parser elle permet de lui donner les fonctions
 //Fonction qui initialise un tableau de struct fonction  passé en parametre
@@ -131,9 +154,9 @@ void initCommands(fonction* res, struct window* window) {
   int(*pointeurMOVEIMAGE)(char*, char*, char*, char*);
   pointeurMOVEIMAGE = MOVEIMAGE;
   fonction f6 = {"MOVEIMAGE", 4, {checkName, checkInt, checkInt, checkInt}, pointeurMOVEIMAGE};
-  int(*pointeurBLACKANDWHITE)(char*, char*);
-  pointeurBLACKANDWHITE = BLACKANDWHITE;
-  fonction f7 = {"BLACKANDWHITE", 2, {checkName, checkInt}, pointeurBLACKANDWHITE};
+  int(*pointeurGREYLEVELS)(char*, char*);
+  pointeurGREYLEVELS = GREYLEVELS;
+  fonction f7 = {"GREYLEVELS", 2, {checkName, checkInt}, pointeurGREYLEVELS};
   //exit function
   fonction wind = {"window",0, {},NULL};
   fonction exit = {"exit", 0, {}, NULL};
