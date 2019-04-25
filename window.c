@@ -235,6 +235,45 @@ int load_a_image(struct window* w, char* name, char* image){
 	return 1; //succes
 }
 
+
+/*
+	Fonction qui déplace une image dans sa fenêtre :
+		w : le début de la liste chainée de fenetre
+		name : le nom de la fenêtre où se trouve l'image à déplacer
+		img_name : le nom de l'image
+		x_pixels : le nombre de pixel qu'on déplace sur x
+		y_pixels : le nombre de pixel qu'on déplace sur y
+*/
+int move_image(struct window* w, char* name, char* img_name, int x_pixels, int y_pixels){
+	if(w == NULL || name == NULL || img_name == NULL){
+		return -1;
+	}
+	struct window* window = w;
+	while(strcmp(window->name, name) != 0 && window != NULL){
+		window = window->next;
+	}
+	if(window == NULL){ // pas de fenetre qui porte ce nom
+		return -2; // erreur -2;
+	}
+	struct image_window* image = window->img_w;
+	while(image != NULL && strcmp(get_img_by_key(image->key_image)->name, img_name) != 0){
+		printf("***** %d\n", image->key_image);
+		printf("*** %d\n", (get_img_by_key(image->key_image)));
+		printf("%s\n", img_name);
+		image=image->next;
+	}
+	if(image == NULL){ // pas d'image qui porte ce nom
+		return -3;
+	}
+	image->position_texture->x += x_pixels;
+	image->position_texture->y += y_pixels;
+	SDL_RenderClear(window->renderer);
+	SDL_RenderCopy(window->renderer, image->texture, NULL, image->position_texture);
+	SDL_RenderPresent(window->renderer);
+	SDL_UpdateWindowSurface(window->pWindow);
+	return 1;
+}
+
 //un main de test
 /*int main(void){
 	if(init_SDL() != 0){

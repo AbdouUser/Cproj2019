@@ -16,6 +16,12 @@ int main(void){
 	fonction tableauDesFonctions[NB_OF_FUNCTIONS];
 	initCommands(tableauDesFonctions, w);
 
+	load_a_image(w, "CIMP","test1.jpg");
+	add_window(w, "f2", 200, 200);
+	load_a_image(w, "f2", "test2.jpg");
+
+	move_image(w, "f2", "test2.jpg", 20, 20);
+
 	// boucle principale
 	while(1){
 		// on demande une commande à l'utilisateur
