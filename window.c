@@ -28,7 +28,8 @@ struct window* init_window(char* name, int width, int height){
 	w->name = malloc(strlen(name));
 	// a ce moment w->name n'est pas une chaine vide mais contient des caractères exotiques
 	//w->name = strcat(w->name, name);
-	w->name = name;
+	w->name[0] = '\0';
+	strcat(w->name,name);
 	w->next = NULL;
 	w->img_w = NULL;
 	w->pWindow = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
@@ -185,6 +186,7 @@ int load_An_Image(struct window* w, char* name, char* image){
 		return -1;
 	}
 	struct window* window = w;
+	//printf("****%s\n", window->next->name);
 	while(window != NULL && strcmp(window->name, name) != 0){
 		window = window->next;
 	}

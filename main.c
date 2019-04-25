@@ -30,6 +30,7 @@ int main(void){
 
 	// boucle principale
 	while(1){
+
 		// on demande une commande à l'utilisateur
 		execParser(tableauDesFonctions);  
 
