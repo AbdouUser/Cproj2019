@@ -80,11 +80,11 @@ struct window* getWindow (struct window* w, char* windowName) {
 }
 
 //return the key of the image which has been added
-int add_Image_In_Window(struct window* w, SDL_Texture* texture, SDL_Rect* position_texture){
+int add_Image_In_Window(struct window* w, SDL_Texture* texture, SDL_Rect* position_texture, SDL_Surface* surface){
 	if(w == NULL){ // il n'y a pas de fenetre
 		return -1; // erreur
 	}
-	struct image* img = add_New_Image(w->img_w,texture,position_texture);
+	struct image* img = add_New_Image(w->img_w,texture,position_texture, surface);
 	if (w->img_w == NULL){
 		w->img_w = img;
 	}
@@ -211,16 +211,31 @@ int load_An_Image(struct window* w, char* name, char* image){
 		return -2; // erreur -2;
 	}
 	
-	SDL_Surface *img=NULL;
-	img=IMG_Load(image);
+	SDL_Surface *img=NULL; // on crée une surface pour charger l'image
+	img=IMG_Load(image); // on charge l'image
 	if(img == NULL){ // erreur dans la creation de l'image
 		return -3; // erreur -3
 	}
-	int x = img->w;
+	int x = img->w; // on récupère les dimensions de l'image
 	int y = img->h;
-	SDL_Texture* texture = malloc(sizeof(SDL_Texture*));
-	texture = SDL_CreateTextureFromSurface(window->renderer, img);
-	//SDL_Texture* t = IMG_LoadTexture(window->renderer, "test1.jpg");
+	SDL_Texture* texture_tmp; // on crée une texture tampon dans laquelle on va charger l'image
+	SDL_Texture* texture = malloc(sizeof(SDL_Texture*)); // texture officielle de l'image
+	texture_tmp = SDL_CreateTextureFromSurface(window->renderer, img); // on charge l'image dans la texture tampon : c'est texture n'a pas les droits nécessaires pour retoucher l'image
+	if(texture_tmp == NULL){ // erreur
+		return -3;
+	}
+	// on crée la texture officielle avec les droits de retouches
+	texture = SDL_CreateTexture(window->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, x, y);
+	if(texture == NULL){
+		return -3;
+	}
+	//on copie la texture tampon dans la texture officielle
+	SDL_SetRenderTarget(window->renderer, texture);
+	SDL_RenderCopy(window->renderer, texture_tmp, NULL, NULL);
+	SDL_DestroyTexture(texture_tmp);
+	//SDL_FreeSurface(img);
+	SDL_SetRenderTarget(window->renderer, NULL);
+
 	SDL_Rect* position_texture = malloc(sizeof(SDL_Texture*));
 	position_texture->x = 0;
 	position_texture->y = 0;
@@ -239,7 +254,7 @@ int load_An_Image(struct window* w, char* name, char* image){
 	}
 	*/
 	//SDL_QueryTexture(texture, NULL, NULL, &position_texture->w, &position_texture->h);
-	int key = add_Image_In_Window(window, texture, position_texture);
+	int key = add_Image_In_Window(window, texture, position_texture, img);
 	if(key < 0){
 		return -4; //erreur d'ajout d'image
 	}
@@ -411,6 +426,50 @@ int image_to_first_plan(struct window* w, char* name_w, int img_key){
 	}
 	refreshWindow(window);
 	return 1;
+}
+
+int image_to_grayscale(struct window* w, char* name_w, int img_key){
+	if(w == NULL || name_w == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	struct image* image = get_Image_By_Key_In_Window(window, img_key);
+	if(image == NULL){ // pas d'image avec cette key
+		return -3;
+	}
+
+	// on crée un format RGBA sur 8bit
+	SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
+
+	//on convertit la surface en RGBA sur 8bit
+	image->surface = SDL_ConvertSurface(image->surface, format ,0);
+
+	//on la lock pour pouvoir la modifier
+	SDL_LockSurface(image->surface);
+
+	// on récupère ses pixels
+	Uint32* pixels = image->surface->pixels;
+	size_t i, j;
+	for(i = 0; i < image->surface->h; i++){
+   	 for(j = 0; j < image->surface->w; j++){
+   	 	SDL_Color c;
+   	 	// on recupère la couleur du pixel
+   	 	SDL_GetRGBA(pixels[i * image->surface->w + j], image->surface->format, &c.r, &c.g, &c.b, &c.a);
+   	 	// calcule de la nuance de gris selon le standart Rec. 601 pour écran numérique.
+   	 	int gray = (int)(0.299*(double)c.r + 0.587*(double)c.g + 0.114*(double)c.b);
+        pixels[i * image->surface->w + j] = SDL_MapRGBA(image->surface->format, (Uint8)gray, (Uint8)gray, (Uint8)gray, c.a);
+		}
+	}
+
+	image->texture = SDL_CreateTextureFromSurface(window->renderer, image->surface);
+
+	refreshWindow(window);
+
+	return 1;
+
 }
 
 //un main de test

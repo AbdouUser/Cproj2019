@@ -24,7 +24,7 @@ int get_New_Key(struct image *img){
 }
 
 //return the key of the image
-struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* position_texture){
+struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* position_texture, SDL_Surface* surface){
 	int key = get_New_Key(img);
 	if(img == NULL){ // pas encore d'image
 		img = malloc(sizeof(struct image));
@@ -35,6 +35,7 @@ struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* p
 		img->next = NULL;
 		img->texture = texture;
 		img->position_texture = position_texture;
+		img->surface = surface;
 		return img; //succès
 	}
 	struct image* img_temp = img;
@@ -46,6 +47,7 @@ struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* p
 	img_temp->next->next = NULL;
 	img_temp->next->texture = texture;
 	img_temp->next->position_texture = position_texture;
+	img_temp->next->surface = surface;
 	return img_temp->next;
 }
 

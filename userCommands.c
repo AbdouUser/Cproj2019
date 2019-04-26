@@ -153,9 +153,19 @@ int FIRSTPLANIMAGE(char* fenetre, char* key){
   return 0;
 }
 
+/*
+  Commande GRAYSCALEIMAGE <fenetre> <key_image>
+  met l'image de key key_image dans la fenetre fenetre en niveau de gris
+*/
+int GRAYSCALEIMAGE(char* fenetre, char* key){
+  switch(image_to_grayscale(w, fenetre, atoi(key))){
+
+  }
+  return 0;
+}
+
 //TODO :
 //CREATESELECTION
-//RESIZE
 //CHANGEBORDERS
 //FILL
 //REPLACE
@@ -199,11 +209,13 @@ void initCommands(fonction* res, struct window* window) {
   fonction f9 = {"ZOOMWINDOW", 2, {checkName, checkDouble}, pointeurZOOMWINDOW}; 
   int(*pointeurFIRSTPLANIMAGE)(char*, char*);
   pointeurFIRSTPLANIMAGE = FIRSTPLANIMAGE;
-  fonction f10 = {"FIRSTPLANIMAGE", 2, {checkName, checkName}, pointeurFIRSTPLANIMAGE}; 
+  fonction f10 = {"FIRSTPLANIMAGE", 2, {checkName, checkInt}, pointeurFIRSTPLANIMAGE}; 
   int(*pointeurREMOVEIMAGE)(char*, char*);
   pointeurREMOVEIMAGE = REMOVEIMAGE;
-  fonction f11 = {"REMOVEIMAGE", 2, {checkName, checkName}, pointeurREMOVEIMAGE}; 
-
+  fonction f11 = {"REMOVEIMAGE", 2, {checkName, checkInt}, pointeurREMOVEIMAGE}; 
+  int(*pointeurGRAYSCALEIMAGE)(char*, char*);
+  pointeurGRAYSCALEIMAGE = GRAYSCALEIMAGE;
+  fonction f12 = {"GRAYSCALEIMAGE", 2, {checkName, checkInt}, pointeurGRAYSCALEIMAGE};
 
   //exit function
   fonction wind = {"window",0, {},NULL};
@@ -220,4 +232,5 @@ void initCommands(fonction* res, struct window* window) {
   res[9] = f9;
   res[10] = f10;
   res[11] = f11;
+  res[12] = f12;
 }

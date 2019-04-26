@@ -16,5 +16,6 @@ int RESIZEIMAGE(char* fenetre, char* key, char* width, char* posy);
 int ZOOMWINDOW(char* fenetre, char* zoom);
 int REMOVEIMAGE(char* fenetre, char* key);
 int FIRSTPLANIMAGE(char* fenetre, char* key);
+int GRAYSCALEIMAGE(char* fenetre, char* key);
 
 #endif
