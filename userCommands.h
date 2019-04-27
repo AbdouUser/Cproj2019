@@ -19,5 +19,6 @@ int FIRSTPLANIMAGE(char* fenetre, char* key);
 int GRAYSCALEIMAGE(char* fenetre, char* key);
 int FILLWITH(char* fenetre, char* key, char* r, char* g, char* b);
 int REPLACEWITH(char* fenetre, char* key, char* r, char* g, char* b, char* interval, char* newr, char* newg, char* newb);
+int CREATESELECTION(char* fenetre, char* x1, char* y1, char* x2, char* y2);
 
 #endif

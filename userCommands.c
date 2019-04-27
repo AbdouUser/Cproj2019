@@ -187,7 +187,7 @@ int FILLWITH(char* fenetre, char* key, char* r, char* g, char* b){
 
 /*
   Commande REPLACEWITH <fenetre> <key_image> <red> <green> <blue> <interval> <newRed> <newGreen> <newBLue>
-  rempli l'image dans la fenetre avec la couleur c
+  remplace la couleur red green blue avec un interval par la couleur newr newg newb
 */
 int REPLACEWITH(char* fenetre, char* key, char* r, char* g, char* b, char* interval, char* newr, char* newg, char* newb){
   switch(replace_with_color(w, fenetre, atoi(key), atoi(r),atoi(g),atoi(b), atoi(interval), atoi(newr),atoi(newg),atoi(newb))){
@@ -195,6 +195,21 @@ int REPLACEWITH(char* fenetre, char* key, char* r, char* g, char* b, char* inter
     case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
     case -3: printf("Pas d'image de key %s.\n", key); break;
     default: printf("La couleur r:%s g:%s b:%s dans l'image de key %s a été remplacé avec la couleur r:%s g:%s b:%s dans l'intervale %s.\n",r,g,b,key,newr,newg,newb,interval); break;
+  }
+  return 0;
+}
+
+/*
+  Commande FILLWITH <fenetre> <key_image> <red> <green> <blue>
+  rempli l'image dans la fenetre avec la couleur c
+*/
+int CREATESELECTION(char* fenetre, char* x1, char* y1, char* x2, char* y2){
+  int key = create_selection(w, fenetre, atoi(x1), atoi(y1), atoi(x2), atoi(y2));
+  switch(key){
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Eurreur pendant la creation de la texture\n"); break;
+    default: printf("Selection créée dans la fenetre %s avec la key :%d .\n",fenetre, key); break;
   }
   return 0;
 }
@@ -256,6 +271,9 @@ void initCommands(fonction* res, struct window* window) {
   int(*pointeurREPLACEWITH)(char*, char*,char*,char*,char*,char*, char*,char*,char*);
   pointeurREPLACEWITH = REPLACEWITH;
   fonction f14 = {"REPLACEWITH", 9, {checkName, checkInt, checkInt, checkInt, checkInt, checkInt, checkInt, checkInt, checkInt}, pointeurREPLACEWITH};
+  int(*pointeurCREATESELECTION)(char*,char*,char*,char*,char*);
+  pointeurCREATESELECTION = CREATESELECTION;
+  fonction f15 = {"CREATESELECTION", 5, {checkName, checkInt, checkInt, checkInt, checkInt}, pointeurCREATESELECTION};
 
   //exit function
   fonction wind = {"window",0, {},NULL};
@@ -275,4 +293,5 @@ void initCommands(fonction* res, struct window* window) {
   res[12] = f12;
   res[13] = f13;
   res[14] = f14;
+  res[15] = f15;
 }

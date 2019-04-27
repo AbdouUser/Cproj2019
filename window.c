@@ -27,7 +27,7 @@ struct window* init_window(char* name, int width, int height){
 	struct window* w = malloc(sizeof(struct window));
 	w->name = malloc(strlen(name));
 	// a ce moment w->name n'est pas une chaine vide mais contient des caractères exotiques
-	w->name = name;
+	strcpy(w->name, name);
 	w->next = NULL;
 	w->img_w = NULL;
 	w->pWindow = SDL_CreateWindow(name, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
@@ -41,7 +41,7 @@ struct window* init_window(char* name, int width, int height){
 	}
 	//on définit la couleur de fond de la fenetre (gris)
 	if(SDL_SetRenderDrawColor(w->renderer, 214, 214, 214, 50) != 0 || SDL_RenderClear(w->renderer) != 0){
-		printf("Impossible to set the background-color to this window.");
+		printf("Impossible to set the background-color of this window.");
 	}
 	SDL_RenderPresent(w->renderer); // on actualise le renderer
 
@@ -227,31 +227,93 @@ int load_An_Image(struct window* w, char* name, char* image){
 		return -3;
 	}
 	//on copie la texture tampon dans la texture officielle
-	SDL_SetRenderTarget(window->renderer, texture);
-	SDL_RenderCopy(window->renderer, texture_tmp, NULL, NULL);
+	if(SDL_SetRenderTarget(window->renderer, texture) != 0) {
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
+	if (SDL_RenderCopy(window->renderer, texture_tmp, NULL, NULL) != 0) {
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
 	SDL_DestroyTexture(texture_tmp);
 	//SDL_FreeSurface(img);
-	SDL_SetRenderTarget(window->renderer, NULL);
+	if (SDL_SetRenderTarget(window->renderer, NULL) != 0){
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
 
 	SDL_Rect* position_texture = malloc(sizeof(SDL_Texture*));
 	position_texture->x = 0;
 	position_texture->y = 0;
 	position_texture->w = x;
 	position_texture->h = y;
-	/*
-	int w_w, w_h;
-	SDL_GetWindowSize(w->pWindow , &w_w , &w_h);
-	if(img->h >= img->w){
-		position_texture->w = (int)((float)img->w*((float)w_h/(float)img->h));
-		position_texture->h = w_h;
+	int key = add_Image_In_Window(window, texture, position_texture, img);
+	if(key < 0){
+		return -4; //erreur d'ajout d'image
 	}
-	else{
-		position_texture->w = w_w;
-		position_texture->h = (int)((float)img->h*((float)w_w/(float)img->w));
+	refreshWindow(window);
+	return key; //success
+}
+
+int create_selection(struct window* w, char* name, int x1, int y1, int x2, int y2) {
+	if(w == NULL || name == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w,name);
+	if(window == NULL){ // pas de fenetre qui porte ce nom
+		return -2; // erreur -2;
+	}
+	// on créé le rectangle
+	SDL_Rect position_texture;
+	position_texture.h = y2-y1;
+	position_texture.w = x2-x1;
+	position_texture.x = x1;
+	position_texture.y = y1;
+	// on crée la texture officielle avec les droits de retouches
+	SDL_Texture* texture = malloc(sizeof(SDL_Texture*)); // texture officielle de l'image
+	texture = SDL_CreateTexture(window->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, x2 - x1, y2 - y1);
+	if(texture == NULL){
+		return -3;
+	}
+	int pitch = sizeof(Uint32) * position_texture.w;
+	Uint32 *pixels = malloc(pitch * position_texture.h);
+	if (SDL_RenderReadPixels(window->renderer, &position_texture, SDL_PIXELFORMAT_RGBA8888, pixels, pitch) != 0){
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
+	SDL_Surface* img = SDL_CreateRGBSurfaceWithFormatFrom(pixels, position_texture.w, position_texture.h, 32, pitch,SDL_PIXELFORMAT_RGBA8888);
+	if (img == NULL) {
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
+	if(SDL_UpdateTexture(texture,NULL,pixels,pitch) != 0){
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
+	/*
+	SDL_Texture* texture_tmp; // on crée une texture tampon dans laquelle on va charger l'image
+	texture_tmp = SDL_CreateTextureFromSurface(window->renderer, img);
+	if (texture_tmp == NULL) {
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
+	//on copie la texture tampon dans la texture officielle
+	if(SDL_SetRenderTarget(window->renderer, texture) != 0) {
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
+	if (SDL_RenderCopy(window->renderer, texture_tmp, NULL, NULL) != 0) {
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
+	SDL_DestroyTexture(texture_tmp);
+	//SDL_FreeSurface(img);
+	if (SDL_SetRenderTarget(window->renderer, NULL) != 0){
+		printf("\n%s\n",SDL_GetError());
+		return -3;
 	}
 	*/
-	//SDL_QueryTexture(texture, NULL, NULL, &position_texture->w, &position_texture->h);
-	int key = add_Image_In_Window(window, texture, position_texture, img);
+	int key = add_Image_In_Window(window, texture, &position_texture, img);
 	if(key < 0){
 		return -4; //erreur d'ajout d'image
 	}
@@ -445,7 +507,10 @@ int image_to_grayscale(struct window* w, char* name_w, int img_key){
 	image->surface = SDL_ConvertSurface(image->surface, format ,0);
 
 	//on la lock pour pouvoir la modifier
-	SDL_LockSurface(image->surface);
+	if(SDL_LockSurface(image->surface) != 0){
+		printf("\n%s\n",SDL_GetError());
+		return -4;
+	}
 
 	// on récupère ses pixels
 	Uint32* pixels = image->surface->pixels;
@@ -481,7 +546,6 @@ int fill_with_color(struct window* w, char* name_w, int img_key, SDL_Color c){
 	if(image == NULL){ // pas d'image avec cette key
 		return -3;
 	}
-
 	// on crée un format RGBA sur 8bit
 	SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
 
@@ -489,7 +553,10 @@ int fill_with_color(struct window* w, char* name_w, int img_key, SDL_Color c){
 	image->surface = SDL_ConvertSurface(image->surface, format ,0);
 
 	//on la lock pour pouvoir la modifier
-	SDL_LockSurface(image->surface);
+	if(SDL_LockSurface(image->surface) != 0){
+		printf("\n%s\n",SDL_GetError());
+		return -4;
+	}
 
 	// on récupère ses pixels
 	Uint32* pixels = image->surface->pixels;
@@ -527,7 +594,10 @@ int replace_with_color(struct window* w, char* name_w, int img_key, Uint8 r, Uin
 	image->surface = SDL_ConvertSurface(image->surface, format ,0);
 
 	//on la lock pour pouvoir la modifier
-	SDL_LockSurface(image->surface);
+	if(SDL_LockSurface(image->surface) != 0){
+		printf("\n%s\n",SDL_GetError());
+		return -4;
+	}
 
 	// on récupère ses pixels
 	Uint32* pixels = image->surface->pixels;
