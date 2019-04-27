@@ -24,7 +24,7 @@ int get_New_Key(struct image *img){
 }
 
 //return the key of the image
-struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* position_texture){
+struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* position_texture, SDL_Surface* surface){
 	int key = get_New_Key(img);
 	if(img == NULL){ // pas encore d'image
 		img = malloc(sizeof(struct image));
@@ -35,6 +35,7 @@ struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* p
 		img->next = NULL;
 		img->texture = texture;
 		img->position_texture = position_texture;
+		img->surface = surface;
 		return img; //succès
 	}
 	struct image* img_temp = img;
@@ -46,6 +47,7 @@ struct image* add_New_Image(struct image* img, SDL_Texture* texture, SDL_Rect* p
 	img_temp->next->next = NULL;
 	img_temp->next->texture = texture;
 	img_temp->next->position_texture = position_texture;
+	img_temp->next->surface = surface;
 	return img_temp->next;
 }
 
@@ -62,76 +64,28 @@ struct image *get_Image_By_Key(struct image* img, int key){
 	return NULL;
 }
 
-int greyLevels(SDL_Renderer* renderer, SDL_Rect* rectangle, SDL_Texture* texture) {
-	int width = rectangle->w;
-	int height = rectangle->h;
-	void* temp = malloc(width * height * 4);
-	//Uint32* pixels = malloc(width * height * 4);
-	int pitch = width*4;
-	SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
-	printf("\nw:%d h:%d x:%d y:%d\n",width,height,rectangle->x,rectangle->y);
-	if (renderer == NULL){
-		printf("\nRenderer null\n");
-		return -1;
-	}
-	if (SDL_RenderReadPixels(renderer,NULL,0,&temp,pitch) != 0) {
-		printf("\n%s\n",SDL_GetError());
-		return -1;
-	}
-	printf("\nw:%d h:%d x:%d y:%d\n",width,height,rectangle->x,rectangle->y);
-	
-	Uint8 r,g,b,a;
-	Uint32* pixels = temp;
-	for (size_t i = 0; i < height; i++) {
-		for (size_t j = 0; j < width; j++) {
-			SDL_GetRGBA(pixels[i* width +j], format,&r,&g,&b,&a);
-			Uint8 gris = (r + g + b) / 3;
-			pixels[i* width +j] = SDL_MapRGBA(format,gris,gris,gris,a);
-		}
-	}
-	SDL_FreeFormat(format);
-	if (SDL_UpdateTexture(texture,rectangle,pixels,pitch) != 0) {
-		SDL_GetError();
-	}
-	return 0;
+//change la taille d'une image donnée
+void set_size(struct image* img, int width, int height){
+	img->position_texture->w = width;
+	img->position_texture->h = height;
 }
 
-Uint32 couleur(Uint8 r, Uint8 g, Uint8 b, Uint8 a)
-{
-   return r << 24 | g << 16 | b << 8 | a;
+//applique un facteur de zoom à une image donée
+void zoom_on_a_image(struct image* img, double zoom){
+	img->position_texture->w = (int)(((double)img->position_texture->w)*zoom);
+	img->position_texture->h = (int)(((double)img->position_texture->h)*zoom);
 }
 
-int greyLevelsbis(SDL_Renderer* renderer,SDL_Rect* rectangle, SDL_Texture* texture) {
-	
-	int pitch = 0;
-	int format;
-	int w = rectangle->w;
-	int h = rectangle->h;
-	Uint32* pixels = malloc(4*w*h);
-	/*
-	if (SDL_QueryTexture(texture, &format, NULL,&w,&h) != 0) {
-		SDL_GetError();
-	}
-	*/
-	if (SDL_LockTexture(texture , NULL, (void**)pixels,&pitch) != 0){
-		SDL_GetError();
-	}
-	
-	//Uint8 r,g,b,a;
-	printf("\nw:%d h:%d\n",w,h);
-	for (size_t i = 0; i < h; i++) {
-		for (size_t j = 0; j < w; j++) {
-			//printf("\ni:%d j:%d\n",i,j);
-			//SDL_GetRGBA(pixels[i* w +j], &pFormat,&r,&g,&b,&a);
-			//printf("\ni:%d j:%d\n",i,j);
-			//Uint8 gris = (r + g + b) / 3;
-			pixels[i* w +j] = couleur(0,0,0,255);
-			//printf("\ni:%d j:%d\n",i,j);
-		}
-	}
-	if (SDL_UpdateTexture(texture,rectangle,pixels,pitch) != 0) {
-		SDL_GetError();
-	}
-	SDL_UnlockTexture(texture);
-	return 0;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+

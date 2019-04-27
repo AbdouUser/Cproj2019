@@ -30,6 +30,11 @@ int NEWWINDOW(char* var, char* entier1, char* entier2){
   return 0;
 }
 
+/*
+* Commande LOADIMAGE <image> <fenetre> 
+* ou image est le chemin de l'image
+*/
+
 int LOADIMAGE(char* image, char* fenetre){
   int err = load_An_Image(w, fenetre, image);
   switch (err)
@@ -53,6 +58,10 @@ int LOADIMAGE(char* image, char* fenetre){
   return 0;
 }
 
+/*
+* Commande MOVEIMAGE <fenetre> <key_image> <x> <y>
+*/
+
 int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy){
   int err = move_image(w,fenetre,atoi(key),atoi(posx),atoi(posy));
   switch (err)
@@ -61,7 +70,7 @@ int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy){
     printf("Un argument est est null.\n");
     break;
   case -2:
-    printf("Pas de fenetre du nom %s.\n",fenetre);
+    printf("Pas de fenêtre du nom %s.\n",fenetre);
     break;
   case -3:
     printf("Pas d'image de key %s.\n",key);
@@ -73,57 +82,126 @@ int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy){
   return 0;
 }
 
-//with the -1 key it will modifie all the images and selections in the window
-//the -1 key doesn't work yet
-int GREYLEVELS(char* fenetre, char* key) {
-  struct window* window = getWindow(w,fenetre);
-  if (window == NULL) {
-    printf("Pas de fenetre du nom %s.\n",fenetre);
-    return 0;
+/*
+ * Commande RESIZEIMAGE <fenetre> <key_image> <new_width> <new_height>
+*/
+
+int RESIZEIMAGE(char* fenetre, char* key, char* width, char* height){
+
+  switch(resize_image(w, fenetre, atoi(key), atoi(width), atoi(height))){
+
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("L'image de key %s a bien été redimmensionnée dans la fenêtre %s.\n", key, fenetre); break;
   }
-  SDL_Rect* rectangle = malloc(sizeof(SDL_Rect));
-  SDL_Texture* texture;
-  if(atoi(key) == -1) {
-	  struct image* img = window->img_w;
-    while(img != NULL) {
-      rectangle = img->position_texture;
-      texture = img->texture;
-      int t = greyLevels(window->renderer,rectangle,texture);
-      if (t != 0 ){
-        printf("Erreur pendant le traitement d'une des images.");
-        return 0;
-      }
-      if(img->next != NULL){
-        img = img->next;
-      }
-      else{
-        break;
-      }
-    }
+  return 0;
+
+}
+/*  
+* Commande ZOOMIMAGE <fenetre> <key_image> <zoom>
+* zoom est un facteur de zoom 0.1, 2 etc..
+*/
+int ZOOMIMAGE(char* fenetre, char* key, char* zoom){
+  switch(zoom_image(w, fenetre, atoi(key), atof(zoom))){
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("Le zoom sur l'image de key %s a bien été effectué dans la fenêtre %s.\n", key, fenetre); break;
   }
-  else {
-	  struct image* img = get_Image_By_Key_In_Window(window, atoi(key));
-    if (img == NULL){
-      printf("Pas d'image de key %s.\n",key);
-      return 0;
-    }
-    rectangle = img->position_texture;
-    texture = img->texture;
-    int t = greyLevels(window->renderer,rectangle,texture);
-    if (t != 0 ){
-      printf("Erreur pendant le traitement de l'image.");
-      return 0;
-    }
+  return 0;
+}
+
+/*  
+* Commande ZOOMIMAGE <fenetre> <zoom>
+* zoom est un facteur de zoom 0.1, 2 etc..
+*/
+int ZOOMWINDOW(char* fenetre, char* zoom){
+  switch(zoom_window(w, fenetre, atof(zoom))){
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    default: printf("Le zoom a bien été effectué dans la fenêtre %s.\n", fenetre); break;
   }
-	refreshWindow(window);
-  return 1;
+  return 0;
+}
+
+/*
+* Commande REMOVEIMAGE <fenetre> <key_image>
+* supprime l'image
+*/
+int REMOVEIMAGE(char* fenetre, char* key){
+  switch(remove_image(w, fenetre, atoi(key))){
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("L'image de key %s a bien été supprimée dans la fenêtre %s.\n", key, fenetre); break;
+  }
+  return 0;
+}
+
+/*
+* Commande FIRSTPLANIMAGE <fenetre> <key_image>
+* met l'image de key key_image en premier plan
+*/
+int FIRSTPLANIMAGE(char* fenetre, char* key){
+  switch(image_to_first_plan(w, fenetre, atoi(key))){
+     case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("L'image de key %s a bien été mise au premier plan dans la fenêtre %s.\n", key, fenetre); break;
+  }
+  return 0;
+}
+
+/*
+  Commande GRAYSCALEIMAGE <fenetre> <key_image>
+  met l'image de key key_image dans la fenetre fenetre en niveau de gris
+*/
+int GRAYSCALEIMAGE(char* fenetre, char* key){
+  switch(image_to_grayscale(w, fenetre, atoi(key))){
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("L'image de key %s a été mise en nuances de gris.\n", key); break;
+  }
+  return 0;
+}
+
+/*
+  Commande FILLWITH <fenetre> <key_image> <red> <green> <blue>
+  rempli l'image dans la fenetre avec la couleur c
+*/
+int FILLWITH(char* fenetre, char* key, char* r, char* g, char* b){
+  SDL_Color c;
+  c.r = atoi(r);
+  c.g = atoi(g);
+  c.b = atoi(b);
+  switch(fill_with_color(w, fenetre, atoi(key), c)){
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("L'image de key %s a été rempli avec la couleur r:%s g:%s b:%s .\n", key,r,g,b); break;
+  }
+  return 0;
+}
+
+/*
+  Commande REPLACEWITH <fenetre> <key_image> <red> <green> <blue> <interval> <newRed> <newGreen> <newBLue>
+  rempli l'image dans la fenetre avec la couleur c
+*/
+int REPLACEWITH(char* fenetre, char* key, char* r, char* g, char* b, char* interval, char* newr, char* newg, char* newb){
+  switch(replace_with_color(w, fenetre, atoi(key), atoi(r),atoi(g),atoi(b), atoi(interval), atoi(newr),atoi(newg),atoi(newb))){
+    case -1: printf("Un argument est null.\n"); break;
+    case -2: printf("Pas de fenêtre du nom %s.\n", fenetre); break;
+    case -3: printf("Pas d'image de key %s.\n", key); break;
+    default: printf("La couleur r:%s g:%s b:%s dans l'image de key %s a été remplacé avec la couleur r:%s g:%s b:%s dans l'intervale %s.\n",r,g,b,key,newr,newg,newb,interval); break;
+  }
+  return 0;
 }
 
 //TODO :
 //CREATESELECTION
-//RESIZE
 //CHANGEBORDERS
-//FILL
 //REPLACE
 //BLACKANDWHITE
 //NEGATIVE
@@ -154,9 +232,31 @@ void initCommands(fonction* res, struct window* window) {
   int(*pointeurMOVEIMAGE)(char*, char*, char*, char*);
   pointeurMOVEIMAGE = MOVEIMAGE;
   fonction f6 = {"MOVEIMAGE", 4, {checkName, checkInt, checkInt, checkInt}, pointeurMOVEIMAGE};
-  int(*pointeurGREYLEVELS)(char*, char*);
-  pointeurGREYLEVELS = GREYLEVELS;
-  fonction f7 = {"GREYLEVELS", 2, {checkName, checkInt}, pointeurGREYLEVELS};
+  int(*pointeurRESIZEIMAGE)(char*, char*, char*, char*);
+  pointeurRESIZEIMAGE = RESIZEIMAGE;
+  fonction f7 = {"RESIZEIMAGE", 4, {checkName, checkInt, checkInt, checkInt}, pointeurRESIZEIMAGE};
+  int(*pointeurZOOMIMAGE)(char*, char*, char*);
+  pointeurZOOMIMAGE = ZOOMIMAGE;
+  fonction f8 = {"ZOOMIMAGE", 3, {checkName, checkInt, checkDouble}, pointeurZOOMIMAGE};
+  int(*pointeurZOOMWINDOW)(char*, char*);
+  pointeurZOOMWINDOW = ZOOMWINDOW;
+  fonction f9 = {"ZOOMWINDOW", 2, {checkName, checkDouble}, pointeurZOOMWINDOW}; 
+  int(*pointeurFIRSTPLANIMAGE)(char*, char*);
+  pointeurFIRSTPLANIMAGE = FIRSTPLANIMAGE;
+  fonction f10 = {"FIRSTPLANIMAGE", 2, {checkName, checkInt}, pointeurFIRSTPLANIMAGE}; 
+  int(*pointeurREMOVEIMAGE)(char*, char*);
+  pointeurREMOVEIMAGE = REMOVEIMAGE;
+  fonction f11 = {"REMOVEIMAGE", 2, {checkName, checkInt}, pointeurREMOVEIMAGE}; 
+  int(*pointeurGRAYSCALEIMAGE)(char*, char*);
+  pointeurGRAYSCALEIMAGE = GRAYSCALEIMAGE;
+  fonction f12 = {"GRAYSCALEIMAGE", 2, {checkName, checkInt}, pointeurGRAYSCALEIMAGE};
+  int(*pointeurFILLWITH)(char*, char*,char*,char*,char*);
+  pointeurFILLWITH = FILLWITH;
+  fonction f13 = {"FILLWITH", 5, {checkName, checkInt, checkInt, checkInt, checkInt}, pointeurFILLWITH};
+  int(*pointeurREPLACEWITH)(char*, char*,char*,char*,char*,char*, char*,char*,char*);
+  pointeurREPLACEWITH = REPLACEWITH;
+  fonction f14 = {"REPLACEWITH", 9, {checkName, checkInt, checkInt, checkInt, checkInt, checkInt, checkInt, checkInt, checkInt}, pointeurREPLACEWITH};
+
   //exit function
   fonction wind = {"window",0, {},NULL};
   fonction exit = {"exit", 0, {}, NULL};
@@ -168,4 +268,11 @@ void initCommands(fonction* res, struct window* window) {
   res[5] = f5;
   res[6] = f6;
   res[7] = f7;
+  res[8] = f8;
+  res[9] = f9;
+  res[10] = f10;
+  res[11] = f11;
+  res[12] = f12;
+  res[13] = f13;
+  res[14] = f14;
 }

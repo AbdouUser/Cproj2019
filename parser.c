@@ -46,11 +46,50 @@ char* checkInt(char* s, int* pos){
   return res;
 }
 
+char* checkDouble(char* s, int* pos){
+  char* res = malloc(sizeof(char)*CHAR_LIMIT);
+  int posRes = 0;
+  if(s[*pos] == '-'){
+    res[posRes] = s[*pos];
+    *pos +=1;
+    posRes+=1;
+  }
+  do{
+    if(isInteger(s[*pos])){
+      res[posRes]=s[*pos];
+      *pos+=1;
+      posRes +=1;
+    }
+    else{
+      return NULL;
+    }
+  }while(s[*pos]!= ' ' && s[*pos]!='\0' && s[*pos]!='\n' && s[*pos]!='.');
+  if(s[*pos]!='.'){
+    res[posRes]='\0';
+    return res;
+  }
+  res[posRes] = s[*pos];
+  *pos +=1;
+  posRes+=1;
+  do{
+    if(isInteger(s[*pos])){
+      res[posRes] = s[*pos];
+      *pos +=1;
+      posRes+=1;
+    }
+    else{
+      return NULL;
+    }
+  }while(s[*pos]!= ' ' && s[*pos]!='\0' && s[*pos]!='\n');
+  res[posRes]='\0';
+  return res;
+}
+
 char* checkName(char* s, int* pos){
   char* res = malloc (sizeof (char) * CHAR_LIMIT);
   int posRes = 0;
   do {
-    if (isAlphanumeric(s[*pos]) || s[*pos] == '.' ||  s[*pos] == '_' ||  s[*pos] == '-') {
+    if (isAlphanumeric(s[*pos]) || s[*pos] == '.' ||  s[*pos] == '_' ||  s[*pos] == '-' || s[*pos] == '/') {
       res[posRes]=s[*pos];
       *pos += 1;
       posRes += 1;
@@ -252,12 +291,72 @@ if (noErrorOccurred == 1){
     free(paramTab[3]);
     break;
     case 5 :
-    (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3],paramTab[4]);
+    lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3],paramTab[4]);
     free(paramTab[0]);
     free(paramTab[1]);
     free(paramTab[2]);
     free(paramTab[3]);
     free(paramTab[4]);
+    break;
+    case 6 :
+    lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3],paramTab[4],
+                                                paramTab[5]);
+    free(paramTab[0]);
+    free(paramTab[1]);
+    free(paramTab[2]);
+    free(paramTab[3]);
+    free(paramTab[4]);
+    free(paramTab[5]);
+    break;
+    case 7 :
+    lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3],paramTab[4],
+                                                paramTab[5],paramTab[6]);
+    free(paramTab[0]);
+    free(paramTab[1]);
+    free(paramTab[2]);
+    free(paramTab[3]);
+    free(paramTab[4]);
+    free(paramTab[5]);
+    free(paramTab[6]);
+    break;
+    case 8 :
+    lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3],paramTab[4],
+                                                paramTab[5],paramTab[6],paramTab[7]);
+    free(paramTab[0]);
+    free(paramTab[1]);
+    free(paramTab[2]);
+    free(paramTab[3]);
+    free(paramTab[4]);
+    free(paramTab[5]);
+    free(paramTab[6]);
+    free(paramTab[7]);
+    break;
+    case 9 :
+    lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3],paramTab[4],
+                                                paramTab[5],paramTab[6],paramTab[7],paramTab[8]);
+    free(paramTab[0]);
+    free(paramTab[1]);
+    free(paramTab[2]);
+    free(paramTab[3]);
+    free(paramTab[4]);
+    free(paramTab[5]);
+    free(paramTab[6]);
+    free(paramTab[7]);
+    free(paramTab[8]);
+    break;
+    case 10 :
+    lastFuncCalledValue = (*f->pointeurFunction)(paramTab[0],paramTab[1],paramTab[2],paramTab[3],paramTab[4],
+                                                paramTab[5],paramTab[6],paramTab[7],paramTab[8],paramTab[9]);
+    free(paramTab[0]);
+    free(paramTab[1]);
+    free(paramTab[2]);
+    free(paramTab[3]);
+    free(paramTab[4]);
+    free(paramTab[5]);
+    free(paramTab[6]);
+    free(paramTab[7]);
+    free(paramTab[8]);
+    free(paramTab[9]);
     break;
     default:
     printf("\nNombre de paramètres incorrect\n");

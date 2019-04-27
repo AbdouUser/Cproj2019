@@ -15,19 +15,8 @@ int main(void){
 
 	fonction tableauDesFonctions[NB_OF_FUNCTIONS];
 	initCommands(tableauDesFonctions, w);
-
-	//For testing purpose :
-	int key = load_An_Image(w,"CIMP","papillon.jpg");
-	struct image* img = get_Image_By_Key_In_Window(w,key);
-	key = load_An_Image(w,"CIMP","test80.png");
-	key = load_An_Image(w,"CIMP","test80.png");
-	move_image(w,"CIMP",key,80,0);
-	key = load_An_Image(w,"CIMP","test80.png");
-	move_image(w,"CIMP",key,160,0);
-	greyLevels(w->renderer,img->position_texture,img->texture);
-
 	
-
+	load_An_Image(w,"CIMP","papillon.jpg");
 	// boucle principale
 	while(1){
 		// on demande une commande à l'utilisateur

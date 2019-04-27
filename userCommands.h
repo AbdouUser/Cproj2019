@@ -12,6 +12,12 @@ void initCommands(fonction* res, struct window* w);
 int NEWWINDOW(char* var, char* entier1, char* entier2);
 int LOADIMAGE(char* var, char* fenetre);
 int MOVEIMAGE(char* fenetre, char* key, char* posx, char* posy);
-int GREYLEVELS(char* fenetre, char* key);
+int RESIZEIMAGE(char* fenetre, char* key, char* width, char* posy);
+int ZOOMWINDOW(char* fenetre, char* zoom);
+int REMOVEIMAGE(char* fenetre, char* key);
+int FIRSTPLANIMAGE(char* fenetre, char* key);
+int GRAYSCALEIMAGE(char* fenetre, char* key);
+int FILLWITH(char* fenetre, char* key, char* r, char* g, char* b);
+int REPLACEWITH(char* fenetre, char* key, char* r, char* g, char* b, char* interval, char* newr, char* newg, char* newb);
 
 #endif

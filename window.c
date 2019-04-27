@@ -27,7 +27,6 @@ struct window* init_window(char* name, int width, int height){
 	struct window* w = malloc(sizeof(struct window));
 	w->name = malloc(strlen(name));
 	// a ce moment w->name n'est pas une chaine vide mais contient des caractères exotiques
-	//w->name = strcat(w->name, name);
 	w->name = name;
 	w->next = NULL;
 	w->img_w = NULL;
@@ -81,11 +80,11 @@ struct window* getWindow (struct window* w, char* windowName) {
 }
 
 //return the key of the image which has been added
-int add_Image_In_Window(struct window* w, SDL_Texture* texture, SDL_Rect* position_texture){
+int add_Image_In_Window(struct window* w, SDL_Texture* texture, SDL_Rect* position_texture, SDL_Surface* surface){
 	if(w == NULL){ // il n'y a pas de fenetre
 		return -1; // erreur
 	}
-	struct image* img = add_New_Image(w->img_w,texture,position_texture);
+	struct image* img = add_New_Image(w->img_w,texture,position_texture, surface);
 	if (w->img_w == NULL){
 		w->img_w = img;
 	}
@@ -204,24 +203,36 @@ int load_An_Image(struct window* w, char* name, char* image){
 	if(w == NULL || name == NULL || image == NULL){
 		return -1;
 	}
-	struct window* window = w;
-	while(window != NULL && strcmp(window->name, name) != 0){
-		window = window->next;
-	}
+	struct window* window = getWindow(w,name);
 	if(window == NULL){ // pas de fenetre qui porte ce nom
 		return -2; // erreur -2;
 	}
 	
-	SDL_Surface *img=NULL;
-	img=IMG_Load(image);
+	SDL_Surface *img=NULL; // on crée une surface pour charger l'image
+	img=IMG_Load(image); // on charge l'image
 	if(img == NULL){ // erreur dans la creation de l'image
 		return -3; // erreur -3
 	}
-	int x = img->w;
+	int x = img->w; // on récupère les dimensions de l'image
 	int y = img->h;
-	SDL_Texture* texture = malloc(sizeof(SDL_Texture*));
-	texture = SDL_CreateTextureFromSurface(window->renderer, img);
-	//SDL_Texture* t = IMG_LoadTexture(window->renderer, "test1.jpg");
+	SDL_Texture* texture_tmp; // on crée une texture tampon dans laquelle on va charger l'image
+	SDL_Texture* texture = malloc(sizeof(SDL_Texture*)); // texture officielle de l'image
+	texture_tmp = SDL_CreateTextureFromSurface(window->renderer, img); // on charge l'image dans la texture tampon : c'est texture n'a pas les droits nécessaires pour retoucher l'image
+	if(texture_tmp == NULL){ // erreur
+		return -3;
+	}
+	// on crée la texture officielle avec les droits de retouches
+	texture = SDL_CreateTexture(window->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, x, y);
+	if(texture == NULL){
+		return -3;
+	}
+	//on copie la texture tampon dans la texture officielle
+	SDL_SetRenderTarget(window->renderer, texture);
+	SDL_RenderCopy(window->renderer, texture_tmp, NULL, NULL);
+	SDL_DestroyTexture(texture_tmp);
+	//SDL_FreeSurface(img);
+	SDL_SetRenderTarget(window->renderer, NULL);
+
 	SDL_Rect* position_texture = malloc(sizeof(SDL_Texture*));
 	position_texture->x = 0;
 	position_texture->y = 0;
@@ -240,7 +251,7 @@ int load_An_Image(struct window* w, char* name, char* image){
 	}
 	*/
 	//SDL_QueryTexture(texture, NULL, NULL, &position_texture->w, &position_texture->h);
-	int key = add_Image_In_Window(window, texture, position_texture);
+	int key = add_Image_In_Window(window, texture, position_texture, img);
 	if(key < 0){
 		return -4; //erreur d'ajout d'image
 	}
@@ -271,36 +282,272 @@ int move_image(struct window* w, char* name, int img_key, int x_pixels, int y_pi
 	}
 	image->position_texture->x += x_pixels;
 	image->position_texture->y += y_pixels;
-	refreshWindow(w);
+	refreshWindow(window);
 	return 1;
 }
 
-//un main de test
-/*int main(void){
-	if(init_SDL() != 0){
+int resize_image(struct window* w, char* name_w, int img_key, int width, int height){
+	if(w == NULL || name_w == NULL){
 		return -1;
 	}
-	struct window* w = init_window("Fenêtre 1", 600, 600);
-	if(w == NULL){
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	// on récupère l'image
+	struct image* image = get_Image_By_Key_In_Window(window, img_key);
+	if(image == NULL){ // pas d'image avec cette key
+		return -3;
+	}
+	set_size(image, width, height);
+	refreshWindow(window);
+	return 1;
+}
+
+//applique un facteur de zoom sur l'image de key img_key dans la fenetre name_w
+int zoom_image(struct window* w, char* name_w, int img_key, double zoom){
+	if(w == NULL || name_w == NULL){
 		return -1;
 	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	struct image* image = get_Image_By_Key_In_Window(window, img_key);
+	if(image == NULL){ // pas d'image avec cette key
+		return -3;
+	}
+	zoom_on_a_image(image, zoom);
+	refreshWindow(window);
+	printf("%s %d : %d x %d\n", name_w, img_key, image->position_texture->w, image->position_texture->h);
+	return 1;
+}
 
-	if(add_window(w,"Fenetre 2", 600, 600) == -1){
+//effectue un zoom sur toute une window
+int zoom_window(struct window* w, char* name_w, double zoom){
+	if(w == NULL || name_w == NULL){
 		return -1;
 	}
-	
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	if(window->img_w == NULL){ // aucune image
+		return 1;
+	}
+	struct image* image = window->img_w;
+	while(image != NULL){
+		zoom_on_a_image(image, zoom);
+		image = image->next;
+	}
+	refreshWindow(window);
+	return 1;
+}
 
-	if(add_window(w,"Salut", 100, 200) == -1){
+int remove_image(struct window* w, char* name_w, int img_key){
+	if(w == NULL || name_w == NULL){
 		return -1;
 	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	if(window->img_w == NULL){
+		return -3;
+	}
+	struct image* image = window->img_w;
+	if(image->key_image == img_key){ // c'est la première image
+		window->img_w = image->next;
+		free(image);
+		refreshWindow(window);
+		return 1;
+	}
+	while(image->next != NULL && image->next->key_image != img_key){
+		image = image->next;
+	}
+	if(image->next == NULL){
+		return -3;
+	}
+	struct image* i_suppr = image->next; // on la stocke pour pouvoir la free
+	image->next = image->next->next;
+	free(i_suppr);
+	refreshWindow(window);
+	return 1;
+}
 
-	init_images();
+int image_to_first_plan(struct window* w, char* name_w, int img_key){
+	if(w == NULL || name_w == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	if(window->img_w == NULL){
+		return -3;
+	}
+	if(window->img_w->next == NULL){ // une seule image
+		return 1;
+	}
 
-	printf("*************** %d\n", load_An_Image(w, "Fenêtre 1", "test1.jpg"));
-	
-	    wait_event_react_until_quit_or_ask(w);
+	struct image* test = window->img_w;
+	while(test != NULL){
+		test = test->next;
+	}
 
-	close_window(w);
-	end_SDL();
-	return 0;
-}*/
+	struct image* image = window->img_w;
+	struct image* image_s;
+	if(image->key_image == img_key){ 
+		image_s = image;
+		window->img_w = image->next;
+	}
+	else{
+		while(image->next != NULL && image->next->key_image != img_key){
+			image = image->next;
+		}
+		if(image->next == NULL){
+			return -3;
+		}
+		image_s = image->next;
+		image->next = image->next->next;
+	}
+	image_s->next = NULL; // c'est la dernière image
+	image = window->img_w;
+	while(image->next != NULL){ // on va à la dernière image
+		image = image->next;
+	}
+	image->next = image_s; // on ajoute notre image
+	test = window->img_w;
+	while(test != NULL){
+		test = test->next;
+	}
+	refreshWindow(window);
+	return 1;
+}
+
+int image_to_grayscale(struct window* w, char* name_w, int img_key){
+	if(w == NULL || name_w == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	struct image* image = get_Image_By_Key_In_Window(window, img_key);
+	if(image == NULL){ // pas d'image avec cette key
+		return -3;
+	}
+
+	// on crée un format RGBA sur 8bit
+	SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
+
+	//on convertit la surface en RGBA sur 8bit
+	image->surface = SDL_ConvertSurface(image->surface, format ,0);
+
+	//on la lock pour pouvoir la modifier
+	SDL_LockSurface(image->surface);
+
+	// on récupère ses pixels
+	Uint32* pixels = image->surface->pixels;
+	size_t i, j;
+	for(i = 0; i < image->surface->h; i++){
+   	 for(j = 0; j < image->surface->w; j++){
+   	 	SDL_Color c;
+   	 	// on recupère la couleur du pixel
+   	 	SDL_GetRGBA(pixels[i * image->surface->w + j], image->surface->format, &c.r, &c.g, &c.b, &c.a);
+   	 	// calcule de la nuance de gris selon le standart Rec. 601 pour écran numérique.
+   	 	int gray = (int)(0.299*(double)c.r + 0.587*(double)c.g + 0.114*(double)c.b);
+        pixels[i * image->surface->w + j] = SDL_MapRGBA(image->surface->format, (Uint8)gray, (Uint8)gray, (Uint8)gray, c.a);
+		}
+	}
+
+	image->texture = SDL_CreateTextureFromSurface(window->renderer, image->surface);
+
+	refreshWindow(window);
+
+	return 1;
+
+}
+
+int fill_with_color(struct window* w, char* name_w, int img_key, SDL_Color c){
+	if(w == NULL || name_w == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	struct image* image = get_Image_By_Key_In_Window(window, img_key);
+	if(image == NULL){ // pas d'image avec cette key
+		return -3;
+	}
+
+	// on crée un format RGBA sur 8bit
+	SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
+
+	//on convertit la surface en RGBA sur 8bit
+	image->surface = SDL_ConvertSurface(image->surface, format ,0);
+
+	//on la lock pour pouvoir la modifier
+	SDL_LockSurface(image->surface);
+
+	// on récupère ses pixels
+	Uint32* pixels = image->surface->pixels;
+	size_t i, j;
+	for(i = 0; i < image->surface->h; i++){
+   	 for(j = 0; j < image->surface->w; j++){
+        pixels[i * image->surface->w + j] = SDL_MapRGBA(image->surface->format, c.r, c.g, c.b, c.a);
+		}
+	}
+
+	image->texture = SDL_CreateTextureFromSurface(window->renderer, image->surface);
+
+	refreshWindow(window);
+
+	return 1;
+}
+
+int replace_with_color(struct window* w, char* name_w, int img_key, Uint8 r, Uint8 g, Uint8 b,Uint8 interval, Uint8 newr, Uint8 newg, Uint8 newb){
+	if(w == NULL || name_w == NULL){
+		return -1;
+	}
+	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
+	if(window == NULL){ // pas de fenêtre qui porte ce nom
+		return -2;
+	}
+	struct image* image = get_Image_By_Key_In_Window(window, img_key);
+	if(image == NULL){ // pas d'image avec cette key
+		return -3;
+	}
+
+	// on crée un format RGBA sur 8bit
+	SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
+
+	//on convertit la surface en RGBA sur 8bit
+	image->surface = SDL_ConvertSurface(image->surface, format ,0);
+
+	//on la lock pour pouvoir la modifier
+	SDL_LockSurface(image->surface);
+
+	// on récupère ses pixels
+	Uint32* pixels = image->surface->pixels;
+	size_t i, j;
+	for(i = 0; i < image->surface->h; i++){
+   		for(j = 0; j < image->surface->w; j++){
+			SDL_Color c;
+			// on recupère la couleur du pixel
+			SDL_GetRGBA(pixels[i * image->surface->w + j], image->surface->format, &c.r, &c.g, &c.b, &c.a);
+			if(c.r >= r-interval && c.r <= r+interval &&
+				c.g >= g-interval && c.g <= g+interval &&
+				c.b >= b-interval && c.b <= b+interval){
+				pixels[i * image->surface->w + j] = SDL_MapRGBA(image->surface->format, newr, newg, newb, c.a);
+			}
+		}
+	}
+
+	image->texture = SDL_CreateTextureFromSurface(window->renderer, image->surface);
+
+	refreshWindow(window);
+
+	return 1;
+}

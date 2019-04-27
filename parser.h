@@ -2,8 +2,8 @@
 #define PARSER_H
 
 #define CHAR_LIMIT 500 //longueur max en char des commandes de l'utilisateur dans le shell
-#define NB_OF_FUNCTIONS 8 //Nombre de commandes totales !!ATTENTION A BIEN VERIFIER!!
-#define NB_PARAM_MAX 5 //Ne pas modifier sans modifier la partie du main avec le switch statement
+#define NB_OF_FUNCTIONS 15 //Nombre de commandes totales !!ATTENTION A BIEN VERIFIER!!
+#define NB_PARAM_MAX 10 //Ne pas modifier sans modifier la partie du main avec le switch statement
 
 //une fonction est une struct qui contient les informations necessaire au fonctionnement du parser
 typedef struct fonction {
@@ -22,6 +22,7 @@ short isInteger(char c);
 char* checkName(char* s, int* pos);
 short isAlphabetic(char c);
 char* checkInt(char* s, int* pos);
+char* checkDouble(char* s, int* pos);
 char* checkVar(char* s, int* pos);
 fonction* searchFunction (char* s, int* pos, fonction* funcTab);
 void normalise (char* s);
