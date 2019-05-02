@@ -11,6 +11,7 @@
 //    4: - Pour finir il faut mettre à jour le nombre de fonction dans le fichier parser.h dans les DEFINE
 
 struct window* w;
+struct image* copy;
 
 int test1(char* entier) {
   printf("\nExecution of test1 with %s",entier);
@@ -214,22 +215,74 @@ int CREATESELECTION(char* fenetre, char* x1, char* y1, char* x2, char* y2){
   return 0;
 }
 
+//copy the image with the key <key>
+int COPY(char* fenetre, char* key){
+  struct window* window = getWindow(w,fenetre);
+  if (window == NULL){
+    printf("Pas de fenêtre du nom %s.\n", fenetre);
+    return -1;
+  }
+  struct image* temp = get_Image_By_Key_In_Window(w,atoi(key));
+  if (temp == NULL){
+    printf("Pas d'image de key %s.\n", key);
+    return -2;
+  }
+  copy = temp;
+  return 0;
+}
+
+//cut the image with the key <key>
+int CUT(char* fenetre, char* key){
+  int test = COPY(fenetre,key);
+  if(test != 0){
+    return test;
+  }
+  if(remove_image(w,fenetre,key) != 1){
+    printf("Erreur pendant la coupure de l'image.\n");
+    return -3;
+  }
+  return 0;
+}
+
+int PASTE(char* fenetre){
+  if (copy == NULL){
+    printf("Aucune image/selection à copier");
+    return -1;
+  }
+  struct window* window = getWindow(w,fenetre);
+  if (window == NULL){
+    printf("Pas de fenêtre du nom %s.\n", fenetre);
+    return -2;
+  }
+  struct image *temp = copy_image(window,copy);
+  if (temp == NULL ) {
+    printf("Erreur pendant la copie\n");
+    return -3;
+  }
+  
+  int test = add_Image_In_Window(window,temp->texture,temp->position_texture,temp->surface);
+  if(test < 0){
+    printf("Erreur pendant l'ajout de la copie dans la fenetre");
+    return -3;
+  }
+  refreshWindow(window);
+  return 0;
+}
+
 //TODO :
-//CREATESELECTION
+//CREATESELECTION : ne récupère as bien le pixels structure window et affichage du rendu à revoir,
+//peut etre une texture directement dans le struct window que l'on recalcule en fonction des struct images
 //CHANGEBORDERS
-//REPLACE
 //BLACKANDWHITE
 //NEGATIVE
-//COPY
-//CUT
-//PASTE
 //SAVE
 
 
 //initCommands est utilisé par le parser elle permet de lui donner les fonctions
 //Fonction qui initialise un tableau de struct fonction  passé en parametre
-void initCommands(fonction* res, struct window* window) {
+void initCommands(fonction* res, struct window* window, struct image* img) {
   w = window;
+  copy = img;
   //test1 function
   int(*pointeurTest1)(char*);
   pointeurTest1 = test1;
@@ -274,6 +327,15 @@ void initCommands(fonction* res, struct window* window) {
   int(*pointeurCREATESELECTION)(char*,char*,char*,char*,char*);
   pointeurCREATESELECTION = CREATESELECTION;
   fonction f15 = {"CREATESELECTION", 5, {checkName, checkInt, checkInt, checkInt, checkInt}, pointeurCREATESELECTION};
+  int(*pointeurCOPY)(char*, char*);
+  pointeurCOPY = COPY;
+  fonction f16 = {"COPY", 2, {checkName, checkInt}, pointeurCOPY};
+  int(*pointeurCUT)(char*, char*);
+  pointeurCUT = CUT;
+  fonction f17 = {"CUT", 2, {checkName, checkInt}, pointeurCUT};
+  int(*pointeurPASTE)(char*, char*);
+  pointeurPASTE = PASTE;
+  fonction f18 = {"PASTE", 1, {checkName}, pointeurPASTE};
 
   //exit function
   fonction wind = {"window",0, {},NULL};
@@ -294,4 +356,7 @@ void initCommands(fonction* res, struct window* window) {
   res[13] = f13;
   res[14] = f14;
   res[15] = f15;
+  res[16] = f16;
+  res[17] = f17;
+  res[18] = f18;
 }

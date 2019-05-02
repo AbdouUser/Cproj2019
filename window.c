@@ -99,6 +99,7 @@ struct image *get_Image_By_Key_In_Window(struct window* w, int key){
 	return get_Image_By_Key(w->img_w,key); 
 }
 
+
 //Ferme une fenetre
 void close_window(struct window* w){
 	SDL_DestroyRenderer(w->renderer);
@@ -186,6 +187,7 @@ void refreshWindow(struct window* w){
 	SDL_RenderClear(w->renderer);
 	struct image* img = w->img_w;
 	while (img != NULL) {
+		//printf("\nimg:%d",img->texture);
 		if (SDL_RenderCopy(w->renderer, img->texture, NULL, img->position_texture) != 0){
 			SDL_GetError();
 		}
@@ -197,6 +199,30 @@ void refreshWindow(struct window* w){
 		SDL_GetError();
 	}
 	
+}
+
+struct image* copy_image(struct window *window, struct image *copy){
+  SDL_Texture* texture = SDL_CreateTexture(window->renderer,SDL_PIXELFORMAT_RGBA8888,SDL_TEXTUREACCESS_TARGET,copy->position_texture->w,copy->position_texture->h);
+  Uint32* pixels = copy->surface->pixels;
+  int pitch = copy->position_texture->w *4;
+  if (SDL_UpdateTexture(texture,NULL,pixels,pitch) != 0){
+	  printf("\n%s\n",SDL_GetError());
+	  return NULL;
+  }
+  SDL_Surface *surface = SDL_CreateRGBSurfaceWithFormatFrom(pixels,copy->position_texture->w,copy->position_texture->h,32,pitch,SDL_PIXELFORMAT_RGBA8888);
+  if (surface == NULL){
+	  return NULL;
+  }
+  SDL_Rect *rectangle  = malloc(sizeof(SDL_Rect));
+  rectangle->h = copy->position_texture->h;
+  rectangle->w = copy->position_texture->w;
+  rectangle->x = 0;
+  rectangle->y = 0;
+  struct image* res = malloc(sizeof(struct image));
+  res->position_texture = rectangle;
+  res->surface = surface;
+  res->texture = texture;
+  return res;
 }
 
 int load_An_Image(struct window* w, char* name, char* image){
@@ -264,24 +290,28 @@ int create_selection(struct window* w, char* name, int x1, int y1, int x2, int y
 		return -2; // erreur -2;
 	}
 	// on créé le rectangle
-	SDL_Rect position_texture;
-	position_texture.h = y2-y1;
-	position_texture.w = x2-x1;
-	position_texture.x = x1;
-	position_texture.y = y1;
+	SDL_Rect* position_texture = malloc(sizeof(SDL_Rect));
+	position_texture->h = y2-y1;
+	position_texture->w = x2-x1;
+	position_texture->x = x1;
+	position_texture->y = y1;
+	//printf("\n x:%d y:%d w:%d h:%d\n",position_texture->x,position_texture->y,position_texture->h,position_texture->w);
 	// on crée la texture officielle avec les droits de retouches
 	SDL_Texture* texture = malloc(sizeof(SDL_Texture*)); // texture officielle de l'image
-	texture = SDL_CreateTexture(window->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, x2 - x1, y2 - y1);
+	texture = SDL_CreateTexture(window->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, x2 - x1, y2 - y1);
 	if(texture == NULL){
 		return -3;
 	}
-	int pitch = sizeof(Uint32) * position_texture.w;
-	Uint32 *pixels = malloc(pitch * position_texture.h);
+	int pitch = sizeof(Uint32) * position_texture->w;
+	Uint32 *pixels = malloc(pitch * position_texture->h);
+	struct image* imgw = get_Image_By_Key_In_Window(window,0);
+	SDL_SetRenderTarget(window->renderer,imgw->texture);
 	if (SDL_RenderReadPixels(window->renderer, &position_texture, SDL_PIXELFORMAT_RGBA8888, pixels, pitch) != 0){
 		printf("\n%s\n",SDL_GetError());
 		return -3;
 	}
-	SDL_Surface* img = SDL_CreateRGBSurfaceWithFormatFrom(pixels, position_texture.w, position_texture.h, 32, pitch,SDL_PIXELFORMAT_RGBA8888);
+	SDL_SetRenderTarget(window->renderer,NULL);
+	SDL_Surface* img = SDL_CreateRGBSurfaceWithFormatFrom(pixels, position_texture->w, position_texture->h, 32, pitch,SDL_PIXELFORMAT_RGBA8888);
 	if (img == NULL) {
 		printf("\n%s\n",SDL_GetError());
 		return -3;
@@ -313,7 +343,7 @@ int create_selection(struct window* w, char* name, int x1, int y1, int x2, int y
 		return -3;
 	}
 	*/
-	int key = add_Image_In_Window(window, texture, &position_texture, img);
+	int key = add_Image_In_Window(window, texture, position_texture, img);
 	if(key < 0){
 		return -4; //erreur d'ajout d'image
 	}
@@ -526,6 +556,12 @@ int image_to_grayscale(struct window* w, char* name_w, int img_key){
 		}
 	}
 
+	/*
+	if(SDL_UpdateTexture(image->texture,NULL,pixels,image->surface->pitch) != 0){
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
+	*/
 	image->texture = SDL_CreateTextureFromSurface(window->renderer, image->surface);
 
 	refreshWindow(window);
@@ -538,8 +574,8 @@ int fill_with_color(struct window* w, char* name_w, int img_key, SDL_Color c){
 	if(w == NULL || name_w == NULL){
 		return -1;
 	}
-	struct window* window = getWindow(w, name_w); // on recupère la bonne fenetre
-	if(window == NULL){ // pas de fenêtre qui porte ce nom
+	struct window* window = getWindow(w, name_w);// on recupère la bonne fenetre
+	if(window == NULL){// pas de fenêtre qui porte ce nom
 		return -2;
 	}
 	struct image* image = get_Image_By_Key_In_Window(window, img_key);
@@ -550,27 +586,36 @@ int fill_with_color(struct window* w, char* name_w, int img_key, SDL_Color c){
 	SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
 
 	//on convertit la surface en RGBA sur 8bit
-	image->surface = SDL_ConvertSurface(image->surface, format ,0);
+	//image->surface = SDL_ConvertSurface(image->surface, format ,0);
 
 	//on la lock pour pouvoir la modifier
 	if(SDL_LockSurface(image->surface) != 0){
 		printf("\n%s\n",SDL_GetError());
 		return -4;
 	}
-
+	//SDL_SetRenderDrawColor(window->renderer,c.r, c.g, c.b, c.a);
 	// on récupère ses pixels
 	Uint32* pixels = image->surface->pixels;
 	size_t i, j;
-	for(i = 0; i < image->surface->h; i++){
-   	 for(j = 0; j < image->surface->w; j++){
-        pixels[i * image->surface->w + j] = SDL_MapRGBA(image->surface->format, c.r, c.g, c.b, c.a);
+	for(i = 0; i < image->position_texture->h; i++){
+		for(j = 0; j < image->position_texture->w; j++){
+			pixels[i * image->position_texture->w + j] = SDL_MapRGBA(image->surface->format, c.r, c.g, c.b, c.a);
+			//printf("\n i:%d j:%d",i,j);
+			//SDL_RenderDrawPoint(window->renderer,image->position_texture->y + i,image->position_texture->x + j);
 		}
 	}
-
-	image->texture = SDL_CreateTextureFromSurface(window->renderer, image->surface);
-
+	SDL_UnlockSurface(image->surface);
+	SDL_Rect r;
+	r.h = image->surface->h;
+	r.w = image->surface->w;
+	r.x = 0;
+	r.y = 0;
+	if(SDL_UpdateTexture(image->texture,&r,pixels,image->surface->pitch) != 0){
+		printf("\n%s\n",SDL_GetError());
+		return -3;
+	}
+	//image->texture = SDL_CreateTextureFromSurface(window->renderer, image->surface);
 	refreshWindow(window);
-
 	return 1;
 }
 
