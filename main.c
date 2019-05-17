@@ -14,19 +14,26 @@ int main(void){
 	}
 
 	fonction tableauDesFonctions[NB_OF_FUNCTIONS];
-	initCommands(tableauDesFonctions, w);
+	struct image* copy = NULL;
+	initCommands(tableauDesFonctions, w, copy);
+	
+	//initialisation d'une memoire pour la copie d'image/selection
 
-	//For testing purpose :
+	//TEST
 	/*
-	int key = load_An_Image(w,"CIMP","papillon.jpg");
-	key = load_An_Image(w,"CIMP","test80.png");
-	key = load_An_Image(w,"CIMP","test80.png");
-	move_image(w,"CIMP",key,80,0);
-	key = load_An_Image(w,"CIMP","test80.png");
-	move_image(w,"CIMP",key,160,0);
+	int k = load_An_Image(w,"CIMP","papillon.jpg");
+	//move_image(w,"CIMP",k, 10,10);
+	int key = create_selection(w,"CIMP",50,50,100,100);
+	SDL_Color c;
+	c.a = 100;
+	c.r = 0;
+	c.g = 0;
+	c.b = 100;
+	fill_with_color(w,"CIMP",key,c);
+	move_image(w,"CIMP",key,50,50);
+	//refreshWindow(w);
 	*/
 
-	
 
 	// boucle principale
 	while(1){
